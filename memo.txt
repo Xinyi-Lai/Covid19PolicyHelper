@@ -6,3 +6,4 @@ Datasets:
 
 Global Coronavirus (COVID-19) Data
 https://aws.amazon.com/marketplace/pp/prodview-vtnf3vvvheqzw?qid=1597409751562&sr=0-1&ref_=brs_res_product_title#overview
+https://coronadatascraper.com/#sources
