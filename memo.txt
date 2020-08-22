@@ -5,6 +5,7 @@ https://devpost.com/software/covid-19-policy-decision-helper
 Datasets:
 
 Global Coronavirus (COVID-19) Data
+AWS product:
 https://aws.amazon.com/marketplace/pp/prodview-vtnf3vvvheqzw?qid=1597409751562&sr=0-1&ref_=brs_res_product_title#overview
-Data source timeseries.csv :
+Source: timeseries.csv
 https://coronadatascraper.com/#sources
