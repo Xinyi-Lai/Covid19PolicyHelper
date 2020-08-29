@@ -1,0 +1,13 @@
+unnamed-chunk-1	library	read_csv
+unnamed-chunk-2	county_data_abridged	View
+unnamed-chunk-3	county_data_abridged	dim	names
+unnamed-chunk-4	
+unnamed-chunk-5	county_data_abridged	str
+unnamed-chunk-6	
+unnamed-chunk-7	read_csv
+unnamed-chunk-8	str	timeseries
+unnamed-chunk-9	read_csv
+unnamed-chunk-10	str	timeseries
+unnamed-chunk-11	read_csv
+unnamed-chunk-12	model_out	str
+helper_functions	^	<	$	abline	abs	bptest	c	coef	dat_trn	dat_tst	exp	fitted	hatvalues	if	ifelse	length	list	mean	na.omit	par	plot	predict	qqline	qqnorm	resid	shapiro.test	sqrt	summary	unname

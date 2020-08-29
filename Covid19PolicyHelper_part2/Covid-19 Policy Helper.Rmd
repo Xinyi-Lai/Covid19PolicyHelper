@@ -1,0 +1,198 @@
+---
+title: "Covid-19 Policy Helper"
+date: Aug 2020
+author: "Xinyi Lai, Yulin Li"
+output: 
+  html_document: 
+    theme: readable
+    toc: yes
+    toc_depth: 4
+    number_sections: no
+urlcolor: cyan
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 80)
+library(knitr)
+opts_chunk$set(cache = TRUE, autodep = TRUE)
+```
+
+
+## Data Preprocessing
+
+```{r}
+library(readr)
+county_data_abridged = read_csv("county_data_abridged.csv")
+```
+
+### County-Level Demographic Data
+
+```{r eval=FALSE, include=FALSE}
+View(county_data_abridged)
+```
+
+```{r}
+dim(county_data_abridged)
+names(county_data_abridged)
+
+# county_data_abridged$
+```
+
+
+```{r}
+# data = subset(county_data_abridged, 
+#               select = c(CountyName, StateName, POP_LATITUDE, POP_LONGITUDE, HPSAPercentPoverty， 
+#                          PopulationEstimate2018， PopulationEstimate65+2017， PopTotalMale2017， PopTotalFemale2017， PopulationDensityperSqMile2010，"#EligibleforMedicare2018"，))
+```
+
+
+```{r}
+# county_data_abridged[1, 22] = "EligibleforMedicare2018"
+str(county_data_abridged)
+```
+
+
+```{r, warning=FALSE}
+
+
+
+
+# # remove missing data, which is stored as "NA"
+# data = na.omit(data)
+# 
+# 
+# 
+# # get rid of the messy codes in the floor variable and coerce the results to numeric values
+# dat$floor = as.numeric(matrix(unlist(strsplit(dat$floor, " ")), ncol = 2, byrow = TRUE)[ , 2])
+# # remove the variables we are not interested in such as url and transaction id
+# dat = subset(dat, select = c(price, square, livingRoom, drawingRoom, kitchen, bathRoom, floor, buildingType, constructionTime, renovationCondition, buildingStructure, ladderRatio, elevator, subway, district))
+# # coerce the categorical predictors to factor variables
+# dat$buildingType = as.factor(dat$buildingType)
+# dat$renovationCondition = as.factor(dat$renovationCondition)
+# dat$buildingStructure = as.factor(dat$buildingStructure)
+# dat$elevator = as.factor(dat$elevator)
+# dat$subway = as.factor(dat$subway)
+# dat$district = as.factor(dat$district)
+# # coerce constructionTime to numeric variable (originally character type)
+# dat$constructionTime = as.numeric(dat$constructionTime)
+# # remove missing values again since some of the preceding steps resulting in new NA values
+# dat = na.omit(dat)
+# # extract data of houses built after 2010 and drop all redundant levels in the categorical predictors
+# dat = subset(dat, constructionTime > 2010)
+# dat = droplevels(dat)
+```
+
+
+
+### County-Level Mobility Data
+
+```{r}
+timeseries = read_csv("../datasets/timeseries.csv")
+```
+
+```{r}
+str(timeseries)
+```
+
+
+### County-Level Infection Data 
+
+#### Cases 
+```{r}
+timeseries = read_csv("../datasets/timeseries.csv")
+```
+
+```{r}
+str(timeseries)
+```
+
+
+#### SEIR Model Parameters
+```{r}
+model_out = read_csv("../datasets/model_out.csv")
+```
+
+```{r}
+str(model_out)
+```
+
+
+
+## Appendix 
+
+### Helper Functions 
+
+```{r helper_functions, eval=FALSE}
+get_bp_decision = function(model, alpha) {
+  decide = unname(bptest(model)$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_bp_pval = function(model) {
+  bptest(model)$p.value
+}
+
+get_sw_decision = function(model, alpha) {
+  decide = unname(shapiro.test(resid(model))$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_sw_pval = function(model) {
+  shapiro.test(resid(model))$p.value
+}
+
+get_num_params = function(model) {
+  length(coef(model))
+}
+
+get_loocv_rmse = function(model, is_log) {
+  ifelse(
+    is_log, 
+    sqrt(mean(na.omit(((dat_trn$price - exp(fitted(model))) / (1 - hatvalues(model))) ^ 2))),
+    sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+  )
+}
+
+get_adj_r2 = function(model) {
+  summary(model)$adj.r.squared
+}
+
+test_mod = function(model, is_log = FALSE){
+  c(loocv_rmse = get_loocv_rmse(model, is_log), 
+    adj_r2 = get_adj_r2(model), 
+    bp_pval = get_bp_pval(model), 
+    sw_pval = get_sw_pval(model), 
+    num_params = get_num_params(model))
+}
+
+diagnostics = function(model, pcol = "grey", lcol = "dodgerblue", alpha = 0.05, plotit = TRUE, testit = TRUE){
+  if (plotit){
+    par(mfrow = c(1, 2), pty="s")
+    
+    plot(fitted(model), resid(model), col = "grey", pch = 20, 
+         xlab = "Fitted", ylab = "Residual", 
+         main = "Fitted versus Residuals")
+    abline(h = 0, col = "darkorange", lwd = 2)
+    
+    qqnorm(resid(model), col = pcol)
+    qqline(resid(model), col = lcol, lwd = 2)
+  }
+  if (testit){
+    list(p_val = shapiro.test(resid(model))$p, 
+         decision = ifelse(test = shapiro.test(resid(model))$p < alpha, 
+                           yes = "Reject", no = "Fail to Reject"))
+  }
+}
+
+get_test_rmse = function(model) {
+  sqrt(mean((dat_tst$price - predict(model, newdata = dat_tst))^ 2))
+}
+
+get_perc_err = function(model) {
+  actual = dat_tst$price
+  predicted = predict(model, dat_tst)
+  100 * mean((abs(actual - predicted)) / actual)
+}
+```
