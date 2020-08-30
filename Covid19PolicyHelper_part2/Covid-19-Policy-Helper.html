@@ -389,6 +389,12 @@ summary {
 <li><a href="#cases">Cases</a></li>
 <li><a href="#seir-model-parameters">SEIR Model Parameters</a></li>
 </ul></li>
+<li><a href="#combined-data-of-intersts">Combined Data of Intersts</a></li>
+</ul></li>
+<li><a href="#modeling">Modeling</a></li>
+<li><a href="#testing">Testing</a></li>
+<li><a href="#project-intro">Project Intro</a><ul>
+<li><a href="#draft-and-outline">Draft and Outline</a></li>
 </ul></li>
 <li><a href="#appendix">Appendix</a><ul>
 <li><a href="#helper-functions">Helper Functions</a></li>
@@ -398,21 +404,10 @@ summary {
 
 <div id="data-preprocessing" class="section level2">
 <h2>Data Preprocessing</h2>
-<pre class="r"><code>library(readr)
-county_data_abridged = read_csv(&quot;county_data_abridged.csv&quot;)</code></pre>
-<pre><code>## Parsed with column specification:
-## cols(
-##   .default = col_double(),
-##   countyFIPS = col_character(),
-##   CountyName = col_character(),
-##   StateName = col_character(),
-##   State = col_character(),
-##   CensusRegionName = col_character(),
-##   CensusDivisionName = col_character()
-## )</code></pre>
-<pre><code>## See spec(...) for full column specifications.</code></pre>
 <div id="county-level-demographic-data" class="section level3">
 <h3>County-Level Demographic Data</h3>
+<pre class="r"><code>library(readr)
+county_data_abridged = read_csv(&quot;county_data_abridged.csv&quot;)</code></pre>
 <pre class="r"><code>dim(county_data_abridged)</code></pre>
 <pre><code>## [1] 3244   87</code></pre>
 <pre class="r"><code>names(county_data_abridged)</code></pre>
@@ -460,412 +455,137 @@ county_data_abridged = read_csv(&quot;county_data_abridged.csv&quot;)</code></pr
 ## [83] &quot;foreign travel ban&quot;                &quot;SVIPercentile&quot;                    
 ## [85] &quot;HPSAShortage&quot;                      &quot;HPSAServedPop&quot;                    
 ## [87] &quot;HPSAUnderservedPop&quot;</code></pre>
-<pre class="r"><code># county_data_abridged$</code></pre>
-<pre class="r"><code># data = subset(county_data_abridged, 
-#               select = c(CountyName, StateName, POP_LATITUDE, POP_LONGITUDE, HPSAPercentPoverty， 
-#                          PopulationEstimate2018， PopulationEstimate65+2017， PopTotalMale2017， PopTotalFemale2017， PopulationDensityperSqMile2010，&quot;#EligibleforMedicare2018&quot;，))</code></pre>
-<pre class="r"><code># county_data_abridged[1, 22] = &quot;EligibleforMedicare2018&quot;
-str(county_data_abridged)</code></pre>
-<pre><code>## tibble [3,244 × 87] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
-##  $ countyFIPS                       : chr [1:3244] &quot;01001&quot; &quot;01003&quot; &quot;01005&quot; &quot;01007&quot; ...
-##  $ STATEFP                          : num [1:3244] 1 1 1 1 1 1 1 1 1 1 ...
-##  $ COUNTYFP                         : num [1:3244] 1 3 5 7 9 11 13 15 17 19 ...
-##  $ CountyName                       : chr [1:3244] &quot;Autauga&quot; &quot;Baldwin&quot; &quot;Barbour&quot; &quot;Bibb&quot; ...
-##  $ StateName                        : chr [1:3244] &quot;AL&quot; &quot;AL&quot; &quot;AL&quot; &quot;AL&quot; ...
-##  $ State                            : chr [1:3244] &quot;Alabama&quot; &quot;Alabama&quot; &quot;Alabama&quot; &quot;Alabama&quot; ...
-##  $ lat                              : num [1:3244] 32.5 30.7 31.9 33 34 ...
-##  $ lon                              : num [1:3244] -86.6 -87.7 -85.4 -87.1 -86.6 ...
-##  $ POP_LATITUDE                     : num [1:3244] 32.5 30.5 31.8 33 34 ...
-##  $ POP_LONGITUDE                    : num [1:3244] -86.5 -87.8 -85.3 -87.1 -86.6 ...
-##  $ CensusRegionName                 : chr [1:3244] &quot;South&quot; &quot;South&quot; &quot;South&quot; &quot;South&quot; ...
-##  $ CensusDivisionName               : chr [1:3244] &quot;East South Central&quot; &quot;East South Central&quot; &quot;East South Central&quot; &quot;East South Central&quot; ...
-##  $ Rural-UrbanContinuumCode2013     : num [1:3244] 2 3 6 1 1 6 6 3 6 6 ...
-##  $ PopulationEstimate2018           : num [1:3244] 55601 218022 24881 22400 57840 ...
-##  $ PopTotalMale2017                 : num [1:3244] 27007 103225 13335 12138 28607 ...
-##  $ PopTotalFemale2017               : num [1:3244] 28497 109403 11935 10530 29406 ...
-##  $ FracMale2017                     : num [1:3244] 0.487 0.485 0.528 0.535 0.493 ...
-##  $ PopulationEstimate65+2017        : num [1:3244] 8392 42413 4757 3632 10351 ...
-##  $ PopulationDensityperSqMile2010   : num [1:3244] 91.8 114.7 31 36.8 88.9 ...
-##  $ CensusPopulation2010             : num [1:3244] 54571 182265 27457 22915 57322 ...
-##  $ MedianAge2010                    : num [1:3244] 37 41.1 39 37.8 39 38.5 40.1 38.2 41.5 43.9 ...
-##  $ #EligibleforMedicare2018         : num [1:3244] 11439 54145 6681 5128 13175 ...
-##  $ MedicareEnrollment,AgedTot2017   : num [1:3244] 8046 41590 4706 3389 9542 ...
-##  $ 3-YrDiabetes2015-17              : num [1:3244] 16 33 NA NA NA NA 14 18 21 NA ...
-##  $ DiabetesPercentage               : num [1:3244] 9.9 8.5 15.7 13.3 14.9 22.4 16.9 15.6 17.5 12.2 ...
-##  $ HeartDiseaseMortality            : num [1:3244] 204 183 220 226 225 ...
-##  $ StrokeMortality                  : num [1:3244] 56.1 41.9 49 57.2 52.8 54.1 59 44 45.2 47.3 ...
-##  $ Smokers_Percentage               : num [1:3244] 18.1 17.5 22 19.1 19.2 ...
-##  $ RespMortalityRate2014            : num [1:3244] 81.8 54.3 69.8 84.5 87 ...
-##  $ #FTEHospitalTotal2017            : num [1:3244] 324 2101 181 145 103 ...
-##  $ TotalM.D.&#39;s,TotNon-FedandFed2017 : num [1:3244] 50 536 12 16 18 4 18 228 28 14 ...
-##  $ #HospParticipatinginNetwork2017  : num [1:3244] 0 0 0 0 1 0 0 0 0 0 ...
-##  $ #Hospitals                       : num [1:3244] 1 3 1 1 1 1 1 2 0 1 ...
-##  $ #ICU_beds                        : num [1:3244] 6 51 5 0 6 0 7 24 0 0 ...
-##  $ dem_to_rep_ratio                 : num [1:3244] 0.3267 0.2533 0.8931 0.2781 0.0943 ...
-##  $ PopMale&lt;52010                    : num [1:3244] 1866 5614 847 712 1805 ...
-##  $ PopFmle&lt;52010                    : num [1:3244] 1713 5544 855 666 1811 ...
-##  $ PopMale5-92010                   : num [1:3244] 2001 5832 826 759 1936 ...
-##  $ PopFmle5-92010                   : num [1:3244] 1990 5767 816 646 1944 ...
-##  $ PopMale10-142010                 : num [1:3244] 2171 6076 820 771 2113 ...
-##  $ PopFmle10-142010                 : num [1:3244] 2119 5850 779 669 1971 ...
-##  $ PopMale15-192010                 : num [1:3244] 2213 5930 919 806 2139 ...
-##  $ PopFmle15-192010                 : num [1:3244] 2077 5670 812 737 1894 ...
-##  $ PopMale20-242010                 : num [1:3244] 1539 4793 1048 811 1577 ...
-##  $ PopFmle20-242010                 : num [1:3244] 1541 4656 746 680 1530 ...
-##  $ PopMale25-292010                 : num [1:3244] 1543 5183 1212 987 1735 ...
-##  $ PopFmle25-292010                 : num [1:3244] 1614 5064 798 616 1701 ...
-##  $ PopMale30-342010                 : num [1:3244] 1594 5317 1162 1013 1730 ...
-##  $ PopFmle30-342010                 : num [1:3244] 1736 5392 646 633 1711 ...
-##  $ PopMale35-442010                 : num [1:3244] 3978 11620 2115 1895 4022 ...
-##  $ PopFmle35-442010                 : num [1:3244] 4265 11933 1513 1487 3903 ...
-##  $ PopMale45-542010                 : num [1:3244] 4040 13047 2164 1883 4068 ...
-##  $ PopFmle45-542010                 : num [1:3244] 4165 13874 1854 1503 4017 ...
-##  $ PopMale55-592010                 : num [1:3244] 1524 5943 910 734 1810 ...
-##  $ PopFmle55-592010                 : num [1:3244] 1559 6580 907 667 1884 ...
-##  $ PopMale60-642010                 : num [1:3244] 1279 5728 859 684 1700 ...
-##  $ PopFmle60-642010                 : num [1:3244] 1498 6284 940 650 1882 ...
-##  $ PopMale65-742010                 : num [1:3244] 1821 8558 1067 803 2391 ...
-##  $ PopFmle65-742010                 : num [1:3244] 2192 9245 1171 920 2688 ...
-##  $ PopMale75-842010                 : num [1:3244] 841 4379 498 370 1102 ...
-##  $ PopFmle75-842010                 : num [1:3244] 1141 5153 730 534 1450 ...
-##  $ PopMale&gt;842010                   : num [1:3244] 159 1176 129 73 234 ...
-##  $ PopFmle&gt;842010                   : num [1:3244] 392 2057 314 206 574 ...
-##  $ 3-YrMortalityAge&lt;1Year2015-17    : num [1:3244] NA 13 NA NA NA NA NA 10 NA NA ...
-##  $ 3-YrMortalityAge1-4Years2015-17  : num [1:3244] NA NA NA NA NA NA NA NA NA NA ...
-##  $ 3-YrMortalityAge5-14Years2015-17 : num [1:3244] NA NA NA NA NA NA NA NA NA NA ...
-##  $ 3-YrMortalityAge15-24Years2015-17: num [1:3244] NA 23 NA NA 10 NA NA 20 NA NA ...
-##  $ 3-YrMortalityAge25-34Years2015-17: num [1:3244] 10 30 NA NA 13 NA NA 34 NA NA ...
-##  $ 3-YrMortalityAge35-44Years2015-17: num [1:3244] 20 52 NA NA 25 NA 12 54 15 11 ...
-##  $ 3-YrMortalityAge45-54Years2015-17: num [1:3244] 44 125 21 24 49 NA 18 124 30 30 ...
-##  $ 3-YrMortalityAge55-64Years2015-17: num [1:3244] 73 262 44 37 94 16 36 229 72 58 ...
-##  $ 3-YrMortalityAge65-74Years2015-17: num [1:3244] 112 434 65 62 150 32 49 303 97 83 ...
-##  $ 3-YrMortalityAge75-84Years2015-17: num [1:3244] 143 546 72 56 182 30 63 354 105 95 ...
-##  $ 3-YrMortalityAge85+Years2015-17  : num [1:3244] 109 597 68 45 142 28 63 338 114 64 ...
-##  $ mortality2015-17Estimated        : num [1:3244] NA NA NA NA NA NA NA NA NA NA ...
-##  $ stay at home                     : num [1:3244] 737519 737519 737519 737519 737519 ...
-##  $ &gt;50 gatherings                   : num [1:3244] 737504 737504 737504 737504 737504 ...
-##  $ &gt;500 gatherings                  : num [1:3244] 737497 737497 737497 737497 737497 ...
-##  $ public schools                   : num [1:3244] 737500 737500 737500 737500 737500 ...
-##  $ restaurant dine-in               : num [1:3244] 737503 737503 737503 737503 737503 ...
-##  $ entertainment/gym                : num [1:3244] 737512 737512 737512 737512 737512 ...
-##  $ federal guidelines               : num [1:3244] 737500 737500 737500 737500 737500 ...
-##  $ foreign travel ban               : num [1:3244] 737495 737495 737495 737495 737495 ...
-##  $ SVIPercentile                    : num [1:3244] 0.435 0.216 0.996 0.6 0.424 ...
-##  $ HPSAShortage                     : num [1:3244] NA NA 6.08 2.75 7.21 2.38 1.31 4.24 NA 2.75 ...
-##  $ HPSAServedPop                    : num [1:3244] NA NA 5400 14980 31850 ...
-##  $ HPSAUnderservedPop               : num [1:3244] NA NA 18241 6120 25233 ...
-##  - attr(*, &quot;spec&quot;)=
-##   .. cols(
-##   ..   countyFIPS = col_character(),
-##   ..   STATEFP = col_double(),
-##   ..   COUNTYFP = col_double(),
-##   ..   CountyName = col_character(),
-##   ..   StateName = col_character(),
-##   ..   State = col_character(),
-##   ..   lat = col_double(),
-##   ..   lon = col_double(),
-##   ..   POP_LATITUDE = col_double(),
-##   ..   POP_LONGITUDE = col_double(),
-##   ..   CensusRegionName = col_character(),
-##   ..   CensusDivisionName = col_character(),
-##   ..   `Rural-UrbanContinuumCode2013` = col_double(),
-##   ..   PopulationEstimate2018 = col_double(),
-##   ..   PopTotalMale2017 = col_double(),
-##   ..   PopTotalFemale2017 = col_double(),
-##   ..   FracMale2017 = col_double(),
-##   ..   `PopulationEstimate65+2017` = col_double(),
-##   ..   PopulationDensityperSqMile2010 = col_double(),
-##   ..   CensusPopulation2010 = col_double(),
-##   ..   MedianAge2010 = col_double(),
-##   ..   `#EligibleforMedicare2018` = col_double(),
-##   ..   `MedicareEnrollment,AgedTot2017` = col_double(),
-##   ..   `3-YrDiabetes2015-17` = col_double(),
-##   ..   DiabetesPercentage = col_double(),
-##   ..   HeartDiseaseMortality = col_double(),
-##   ..   StrokeMortality = col_double(),
-##   ..   Smokers_Percentage = col_double(),
-##   ..   RespMortalityRate2014 = col_double(),
-##   ..   `#FTEHospitalTotal2017` = col_double(),
-##   ..   `TotalM.D.&#39;s,TotNon-FedandFed2017` = col_double(),
-##   ..   `#HospParticipatinginNetwork2017` = col_double(),
-##   ..   `#Hospitals` = col_double(),
-##   ..   `#ICU_beds` = col_double(),
-##   ..   dem_to_rep_ratio = col_double(),
-##   ..   `PopMale&lt;52010` = col_double(),
-##   ..   `PopFmle&lt;52010` = col_double(),
-##   ..   `PopMale5-92010` = col_double(),
-##   ..   `PopFmle5-92010` = col_double(),
-##   ..   `PopMale10-142010` = col_double(),
-##   ..   `PopFmle10-142010` = col_double(),
-##   ..   `PopMale15-192010` = col_double(),
-##   ..   `PopFmle15-192010` = col_double(),
-##   ..   `PopMale20-242010` = col_double(),
-##   ..   `PopFmle20-242010` = col_double(),
-##   ..   `PopMale25-292010` = col_double(),
-##   ..   `PopFmle25-292010` = col_double(),
-##   ..   `PopMale30-342010` = col_double(),
-##   ..   `PopFmle30-342010` = col_double(),
-##   ..   `PopMale35-442010` = col_double(),
-##   ..   `PopFmle35-442010` = col_double(),
-##   ..   `PopMale45-542010` = col_double(),
-##   ..   `PopFmle45-542010` = col_double(),
-##   ..   `PopMale55-592010` = col_double(),
-##   ..   `PopFmle55-592010` = col_double(),
-##   ..   `PopMale60-642010` = col_double(),
-##   ..   `PopFmle60-642010` = col_double(),
-##   ..   `PopMale65-742010` = col_double(),
-##   ..   `PopFmle65-742010` = col_double(),
-##   ..   `PopMale75-842010` = col_double(),
-##   ..   `PopFmle75-842010` = col_double(),
-##   ..   `PopMale&gt;842010` = col_double(),
-##   ..   `PopFmle&gt;842010` = col_double(),
-##   ..   `3-YrMortalityAge&lt;1Year2015-17` = col_double(),
-##   ..   `3-YrMortalityAge1-4Years2015-17` = col_double(),
-##   ..   `3-YrMortalityAge5-14Years2015-17` = col_double(),
-##   ..   `3-YrMortalityAge15-24Years2015-17` = col_double(),
-##   ..   `3-YrMortalityAge25-34Years2015-17` = col_double(),
-##   ..   `3-YrMortalityAge35-44Years2015-17` = col_double(),
-##   ..   `3-YrMortalityAge45-54Years2015-17` = col_double(),
-##   ..   `3-YrMortalityAge55-64Years2015-17` = col_double(),
-##   ..   `3-YrMortalityAge65-74Years2015-17` = col_double(),
-##   ..   `3-YrMortalityAge75-84Years2015-17` = col_double(),
-##   ..   `3-YrMortalityAge85+Years2015-17` = col_double(),
-##   ..   `mortality2015-17Estimated` = col_double(),
-##   ..   `stay at home` = col_double(),
-##   ..   `&gt;50 gatherings` = col_double(),
-##   ..   `&gt;500 gatherings` = col_double(),
-##   ..   `public schools` = col_double(),
-##   ..   `restaurant dine-in` = col_double(),
-##   ..   `entertainment/gym` = col_double(),
-##   ..   `federal guidelines` = col_double(),
-##   ..   `foreign travel ban` = col_double(),
-##   ..   SVIPercentile = col_double(),
-##   ..   HPSAShortage = col_double(),
-##   ..   HPSAServedPop = col_double(),
-##   ..   HPSAUnderservedPop = col_double()
-##   .. )</code></pre>
-<pre class="r"><code># # remove missing data, which is stored as &quot;NA&quot;
-# data = na.omit(data)
-# 
-# 
-# 
-# # get rid of the messy codes in the floor variable and coerce the results to numeric values
-# dat$floor = as.numeric(matrix(unlist(strsplit(dat$floor, &quot; &quot;)), ncol = 2, byrow = TRUE)[ , 2])
-# # remove the variables we are not interested in such as url and transaction id
-# dat = subset(dat, select = c(price, square, livingRoom, drawingRoom, kitchen, bathRoom, floor, buildingType, constructionTime, renovationCondition, buildingStructure, ladderRatio, elevator, subway, district))
-# # coerce the categorical predictors to factor variables
-# dat$buildingType = as.factor(dat$buildingType)
-# dat$renovationCondition = as.factor(dat$renovationCondition)
-# dat$buildingStructure = as.factor(dat$buildingStructure)
-# dat$elevator = as.factor(dat$elevator)
-# dat$subway = as.factor(dat$subway)
-# dat$district = as.factor(dat$district)
-# # coerce constructionTime to numeric variable (originally character type)
-# dat$constructionTime = as.numeric(dat$constructionTime)
-# # remove missing values again since some of the preceding steps resulting in new NA values
-# dat = na.omit(dat)
-# # extract data of houses built after 2010 and drop all redundant levels in the categorical predictors
-# dat = subset(dat, constructionTime &gt; 2010)
-# dat = droplevels(dat)</code></pre>
+<pre class="r"><code>colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;#EligibleforMedicare2018&quot;] = &quot;EligibleforMedicare2018&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;#FTEHospitalTotal2017&quot;] = &quot;FTEHospitalTotal2017&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;#HospParticipatinginNetwork2017&quot;] = &quot;HospParticipatinginNetwork2017&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;#Hospitals&quot;] = &quot;Hospitals&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;#ICU_beds&quot;] = &quot;ICU_beds&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;PopulationEstimate65+2017&quot;] = &quot;PopulationEstimate_above65_2017&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;stay at home&quot;] = &quot;stay_at_home&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;&gt;50 gatherings&quot;] = &quot;above_50_gatherings&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;&gt;500 gatherings&quot;] = &quot;above_500_gatherings&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;public schools&quot;] = &quot;public_schools&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;restaurant dine-in&quot;] = &quot;restaurant_dine_in&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;entertainment/gym&quot;] = &quot;entertainment_gym&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;federal guidelines&quot;] = &quot;federal_guidelines&quot;
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == &quot;foreign travel ban&quot;] = &quot;foreign_travel_ban&quot;</code></pre>
+<pre class="r"><code>data = subset(county_data_abridged,
+              select = c(State, CountyName, POP_LATITUDE, POP_LONGITUDE,
+                         PopulationEstimate2018, PopTotalMale2017, 
+                         PopulationEstimate_above65_2017, PopulationDensityperSqMile2010, 
+                         DiabetesPercentage, Smokers_Percentage, 
+                         HeartDiseaseMortality, StrokeMortality, 
+                         Hospitals, ICU_beds, HospParticipatinginNetwork2017, 
+                         stay_at_home, above_50_gatherings, above_500_gatherings, 
+                         restaurant_dine_in, entertainment_gym))
+data = na.omit(data)
+data = droplevels(data)
+
+data$stay_at_home = data$stay_at_home - range(data$stay_at_home)[1]
+data$above_50_gatherings = data$above_50_gatherings - range(data$above_50_gatherings)[1]
+data$above_500_gatherings = data$above_500_gatherings - range(data$above_500_gatherings)[1]
+data$restaurant_dine_in = data$restaurant_dine_in - range(data$restaurant_dine_in)[1]
+data$entertainment_gym = data$entertainment_gym - range(data$entertainment_gym)[1]
+
+str(data)</code></pre>
+<pre><code>## tibble [2,585 × 20] (S3: tbl_df/tbl/data.frame)
+##  $ State                          : chr [1:2585] &quot;Alabama&quot; &quot;Alabama&quot; &quot;Alabama&quot; &quot;Alabama&quot; ...
+##  $ CountyName                     : chr [1:2585] &quot;Autauga&quot; &quot;Baldwin&quot; &quot;Barbour&quot; &quot;Bibb&quot; ...
+##  $ POP_LATITUDE                   : num [1:2585] 32.5 30.5 31.8 33 34 ...
+##  $ POP_LONGITUDE                  : num [1:2585] -86.5 -87.8 -85.3 -87.1 -86.6 ...
+##  $ PopulationEstimate2018         : num [1:2585] 55601 218022 24881 22400 57840 ...
+##  $ PopTotalMale2017               : num [1:2585] 27007 103225 13335 12138 28607 ...
+##  $ PopulationEstimate_above65_2017: num [1:2585] 8392 42413 4757 3632 10351 ...
+##  $ PopulationDensityperSqMile2010 : num [1:2585] 91.8 114.7 31 36.8 88.9 ...
+##  $ DiabetesPercentage             : num [1:2585] 9.9 8.5 15.7 13.3 14.9 22.4 16.9 15.6 17.5 12.2 ...
+##  $ Smokers_Percentage             : num [1:2585] 18.1 17.5 22 19.1 19.2 ...
+##  $ HeartDiseaseMortality          : num [1:2585] 204 183 220 226 225 ...
+##  $ StrokeMortality                : num [1:2585] 56.1 41.9 49 57.2 52.8 54.1 59 44 45.2 47.3 ...
+##  $ Hospitals                      : num [1:2585] 1 3 1 1 1 1 1 2 0 1 ...
+##  $ ICU_beds                       : num [1:2585] 6 51 5 0 6 0 7 24 0 0 ...
+##  $ HospParticipatinginNetwork2017 : num [1:2585] 0 0 0 0 1 0 0 0 0 0 ...
+##  $ stay_at_home                   : num [1:2585] 16 16 16 16 16 16 16 16 16 16 ...
+##  $ above_50_gatherings            : num [1:2585] 5 5 5 5 5 5 5 5 5 5 ...
+##  $ above_500_gatherings           : num [1:2585] 2 2 2 2 2 2 2 2 2 2 ...
+##  $ restaurant_dine_in             : num [1:2585] 7 7 7 7 7 7 7 7 7 7 ...
+##  $ entertainment_gym              : num [1:2585] 16 16 16 16 16 16 16 16 16 16 ...
+##  - attr(*, &quot;na.action&quot;)= &#39;omit&#39; Named int [1:659] 68 69 70 71 72 73 74 75 76 77 ...
+##   ..- attr(*, &quot;names&quot;)= chr [1:659] &quot;68&quot; &quot;69&quot; &quot;70&quot; &quot;71&quot; ...</code></pre>
+<pre class="r"><code>data_demographic = data</code></pre>
 </div>
 <div id="county-level-mobility-data" class="section level3">
 <h3>County-Level Mobility Data</h3>
-<pre class="r"><code>timeseries = read_csv(&quot;../datasets/timeseries.csv&quot;)</code></pre>
-<pre><code>## Parsed with column specification:
-## cols(
-##   .default = col_logical(),
-##   locationID = col_character(),
-##   slug = col_character(),
-##   name = col_character(),
-##   level = col_character(),
-##   country = col_character(),
-##   lat = col_double(),
-##   long = col_double(),
-##   population = col_double(),
-##   tz = col_character(),
-##   cases = col_double(),
-##   deaths = col_double(),
-##   recovered = col_double(),
-##   date = col_date(format = &quot;&quot;)
-## )</code></pre>
-<pre><code>## See spec(...) for full column specifications.</code></pre>
-<pre><code>## Warning: 1666558 parsing failures.
-##  row   col           expected     actual                         file
-## 1873 state 1/0/T/F/TRUE/FALSE Burgenland &#39;../datasets/timeseries.csv&#39;
-## 1874 state 1/0/T/F/TRUE/FALSE Burgenland &#39;../datasets/timeseries.csv&#39;
-## 1875 state 1/0/T/F/TRUE/FALSE Burgenland &#39;../datasets/timeseries.csv&#39;
-## 1876 state 1/0/T/F/TRUE/FALSE Burgenland &#39;../datasets/timeseries.csv&#39;
-## 1877 state 1/0/T/F/TRUE/FALSE Burgenland &#39;../datasets/timeseries.csv&#39;
-## .... ..... .................. .......... ............................
-## See problems(...) for more details.</code></pre>
-<pre class="r"><code>str(timeseries)</code></pre>
-<pre><code>## tibble [866,881 × 24] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
-##  $ locationID          : chr [1:866881] &quot;iso1:ad&quot; &quot;iso1:ad&quot; &quot;iso1:ad&quot; &quot;iso1:ad&quot; ...
-##  $ slug                : chr [1:866881] &quot;ad&quot; &quot;ad&quot; &quot;ad&quot; &quot;ad&quot; ...
-##  $ name                : chr [1:866881] &quot;AD&quot; &quot;AD&quot; &quot;AD&quot; &quot;AD&quot; ...
-##  $ level               : chr [1:866881] &quot;country&quot; &quot;country&quot; &quot;country&quot; &quot;country&quot; ...
-##  $ city                : logi [1:866881] NA NA NA NA NA NA ...
-##  $ county              : logi [1:866881] NA NA NA NA NA NA ...
-##  $ state               : logi [1:866881] NA NA NA NA NA NA ...
-##  $ country             : chr [1:866881] &quot;Andorra&quot; &quot;Andorra&quot; &quot;Andorra&quot; &quot;Andorra&quot; ...
-##  $ lat                 : num [1:866881] 42.5 42.5 42.5 42.5 42.5 ...
-##  $ long                : num [1:866881] 1.58 1.58 1.58 1.58 1.58 1.58 1.58 1.58 1.58 1.58 ...
-##  $ population          : num [1:866881] 76177 76177 76177 76177 76177 ...
-##  $ aggregate           : logi [1:866881] NA NA NA NA NA NA ...
-##  $ tz                  : chr [1:866881] &quot;Europe/Andorra&quot; &quot;Europe/Andorra&quot; &quot;Europe/Andorra&quot; &quot;Europe/Andorra&quot; ...
-##  $ cases               : num [1:866881] 0 0 0 0 0 0 0 0 0 0 ...
-##  $ deaths              : num [1:866881] 0 0 0 0 0 0 0 0 0 0 ...
-##  $ recovered           : num [1:866881] 0 0 0 0 0 0 0 0 0 0 ...
-##  $ active              : logi [1:866881] NA NA NA NA NA NA ...
-##  $ tested              : logi [1:866881] NA NA NA NA NA NA ...
-##  $ hospitalized        : logi [1:866881] NA NA NA NA NA NA ...
-##  $ hospitalized_current: logi [1:866881] NA NA NA NA NA NA ...
-##  $ discharged          : logi [1:866881] NA NA NA NA NA NA ...
-##  $ icu                 : logi [1:866881] NA NA NA NA NA NA ...
-##  $ icu_current         : logi [1:866881] NA NA NA NA NA NA ...
-##  $ date                : Date[1:866881], format: &quot;2020-01-23&quot; &quot;2020-01-24&quot; ...
-##  - attr(*, &quot;problems&quot;)= tibble [1,666,558 × 5] (S3: tbl_df/tbl/data.frame)
-##   ..$ row     : int [1:1666558] 1873 1874 1875 1876 1877 1878 1879 1880 1881 1882 ...
-##   ..$ col     : chr [1:1666558] &quot;state&quot; &quot;state&quot; &quot;state&quot; &quot;state&quot; ...
-##   ..$ expected: chr [1:1666558] &quot;1/0/T/F/TRUE/FALSE&quot; &quot;1/0/T/F/TRUE/FALSE&quot; &quot;1/0/T/F/TRUE/FALSE&quot; &quot;1/0/T/F/TRUE/FALSE&quot; ...
-##   ..$ actual  : chr [1:1666558] &quot;Burgenland&quot; &quot;Burgenland&quot; &quot;Burgenland&quot; &quot;Burgenland&quot; ...
-##   ..$ file    : chr [1:1666558] &quot;&#39;../datasets/timeseries.csv&#39;&quot; &quot;&#39;../datasets/timeseries.csv&#39;&quot; &quot;&#39;../datasets/timeseries.csv&#39;&quot; &quot;&#39;../datasets/timeseries.csv&#39;&quot; ...
-##  - attr(*, &quot;spec&quot;)=
-##   .. cols(
-##   ..   locationID = col_character(),
-##   ..   slug = col_character(),
-##   ..   name = col_character(),
-##   ..   level = col_character(),
-##   ..   city = col_logical(),
-##   ..   county = col_logical(),
-##   ..   state = col_logical(),
-##   ..   country = col_character(),
-##   ..   lat = col_double(),
-##   ..   long = col_double(),
-##   ..   population = col_double(),
-##   ..   aggregate = col_logical(),
-##   ..   tz = col_character(),
-##   ..   cases = col_double(),
-##   ..   deaths = col_double(),
-##   ..   recovered = col_double(),
-##   ..   active = col_logical(),
-##   ..   tested = col_logical(),
-##   ..   hospitalized = col_logical(),
-##   ..   hospitalized_current = col_logical(),
-##   ..   discharged = col_logical(),
-##   ..   icu = col_logical(),
-##   ..   icu_current = col_logical(),
-##   ..   date = col_date(format = &quot;&quot;)
-##   .. )</code></pre>
 </div>
 <div id="county-level-infection-data" class="section level3">
 <h3>County-Level Infection Data</h3>
 <div id="cases" class="section level4">
 <h4>Cases</h4>
 <pre class="r"><code>timeseries = read_csv(&quot;../datasets/timeseries.csv&quot;)</code></pre>
-<pre><code>## Parsed with column specification:
-## cols(
-##   .default = col_logical(),
-##   locationID = col_character(),
-##   slug = col_character(),
-##   name = col_character(),
-##   level = col_character(),
-##   country = col_character(),
-##   lat = col_double(),
-##   long = col_double(),
-##   population = col_double(),
-##   tz = col_character(),
-##   cases = col_double(),
-##   deaths = col_double(),
-##   recovered = col_double(),
-##   date = col_date(format = &quot;&quot;)
-## )</code></pre>
-<pre><code>## See spec(...) for full column specifications.</code></pre>
-<pre><code>## Warning: 1666558 parsing failures.
-##  row   col           expected     actual                         file
-## 1873 state 1/0/T/F/TRUE/FALSE Burgenland &#39;../datasets/timeseries.csv&#39;
-## 1874 state 1/0/T/F/TRUE/FALSE Burgenland &#39;../datasets/timeseries.csv&#39;
-## 1875 state 1/0/T/F/TRUE/FALSE Burgenland &#39;../datasets/timeseries.csv&#39;
-## 1876 state 1/0/T/F/TRUE/FALSE Burgenland &#39;../datasets/timeseries.csv&#39;
-## 1877 state 1/0/T/F/TRUE/FALSE Burgenland &#39;../datasets/timeseries.csv&#39;
-## .... ..... .................. .......... ............................
-## See problems(...) for more details.</code></pre>
-<pre class="r"><code>str(timeseries)</code></pre>
-<pre><code>## tibble [866,881 × 24] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
-##  $ locationID          : chr [1:866881] &quot;iso1:ad&quot; &quot;iso1:ad&quot; &quot;iso1:ad&quot; &quot;iso1:ad&quot; ...
-##  $ slug                : chr [1:866881] &quot;ad&quot; &quot;ad&quot; &quot;ad&quot; &quot;ad&quot; ...
-##  $ name                : chr [1:866881] &quot;AD&quot; &quot;AD&quot; &quot;AD&quot; &quot;AD&quot; ...
-##  $ level               : chr [1:866881] &quot;country&quot; &quot;country&quot; &quot;country&quot; &quot;country&quot; ...
-##  $ city                : logi [1:866881] NA NA NA NA NA NA ...
-##  $ county              : logi [1:866881] NA NA NA NA NA NA ...
-##  $ state               : logi [1:866881] NA NA NA NA NA NA ...
-##  $ country             : chr [1:866881] &quot;Andorra&quot; &quot;Andorra&quot; &quot;Andorra&quot; &quot;Andorra&quot; ...
-##  $ lat                 : num [1:866881] 42.5 42.5 42.5 42.5 42.5 ...
-##  $ long                : num [1:866881] 1.58 1.58 1.58 1.58 1.58 1.58 1.58 1.58 1.58 1.58 ...
-##  $ population          : num [1:866881] 76177 76177 76177 76177 76177 ...
-##  $ aggregate           : logi [1:866881] NA NA NA NA NA NA ...
-##  $ tz                  : chr [1:866881] &quot;Europe/Andorra&quot; &quot;Europe/Andorra&quot; &quot;Europe/Andorra&quot; &quot;Europe/Andorra&quot; ...
-##  $ cases               : num [1:866881] 0 0 0 0 0 0 0 0 0 0 ...
-##  $ deaths              : num [1:866881] 0 0 0 0 0 0 0 0 0 0 ...
-##  $ recovered           : num [1:866881] 0 0 0 0 0 0 0 0 0 0 ...
-##  $ active              : logi [1:866881] NA NA NA NA NA NA ...
-##  $ tested              : logi [1:866881] NA NA NA NA NA NA ...
-##  $ hospitalized        : logi [1:866881] NA NA NA NA NA NA ...
-##  $ hospitalized_current: logi [1:866881] NA NA NA NA NA NA ...
-##  $ discharged          : logi [1:866881] NA NA NA NA NA NA ...
-##  $ icu                 : logi [1:866881] NA NA NA NA NA NA ...
-##  $ icu_current         : logi [1:866881] NA NA NA NA NA NA ...
-##  $ date                : Date[1:866881], format: &quot;2020-01-23&quot; &quot;2020-01-24&quot; ...
+<pre class="r"><code>data = timeseries
+data = subset(data, country == &quot;United States&quot; &amp; level == &quot;state&quot;)
+data = subset(data, !(name %in% c(&quot;Unassigned cases, Arkansas, US&quot;, 
+              &quot;Unassigned cases, Georgia, US&quot;, &quot;Unassigned cases, Illinois, US&quot;,
+              &quot;Unassigned cases, Iowa, US&quot;, &quot;Unassigned cases, Maine, US&quot;,
+              &quot;Unassigned cases, Massachusetts, US&quot;, &quot;Unassigned cases, North Dakota, US&quot;,
+              &quot;Washington, D.C., US&quot;)))
+data$state = matrix(unlist(strsplit(as.character(data$name), &quot;, &quot;)), ncol = 2, byrow = TRUE)[, 1]
+data = subset(data,
+              select = c(state, date, cases, deaths, recovered))
+
+
+StateOfInterest = c(&quot;Arizona&quot;, &quot;California&quot;, &quot;Minnesota&quot;, &quot;New Mexico&quot;, &quot;New York&quot;, 
+                   &quot;Oklahoma&quot;, &quot;South Carolina&quot;, &quot;Tennessee&quot;, &quot;Utah&quot;, &quot;Virginia&quot;, 
+                   &quot;West Virginia&quot;, &quot;Wisconsin&quot;)
+data = subset(data, state %in% StateOfInterest)
+
+data$state =     as.factor(data$state)
+data$cases =     as.numeric(data$cases)
+data$deaths =    as.numeric(data$deaths)
+data$recovered = as.numeric(data$recovered)
+
+data = na.omit(data)
+data = droplevels(data)
+
+str(data)</code></pre>
+<pre><code>## tibble [1,578 × 5] (S3: tbl_df/tbl/data.frame)
+##  $ state    : Factor w/ 12 levels &quot;Arizona&quot;,&quot;California&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ date     : Date[1:1578], format: &quot;2020-04-14&quot; &quot;2020-04-15&quot; ...
+##  $ cases    : num [1:1578] 3806 3962 4234 4507 4719 ...
+##  $ deaths   : num [1:1578] 131 142 150 169 177 184 187 208 229 249 ...
+##  $ recovered: num [1:1578] 249 385 460 539 539 ...
 ##  - attr(*, &quot;problems&quot;)= tibble [1,666,558 × 5] (S3: tbl_df/tbl/data.frame)
 ##   ..$ row     : int [1:1666558] 1873 1874 1875 1876 1877 1878 1879 1880 1881 1882 ...
 ##   ..$ col     : chr [1:1666558] &quot;state&quot; &quot;state&quot; &quot;state&quot; &quot;state&quot; ...
 ##   ..$ expected: chr [1:1666558] &quot;1/0/T/F/TRUE/FALSE&quot; &quot;1/0/T/F/TRUE/FALSE&quot; &quot;1/0/T/F/TRUE/FALSE&quot; &quot;1/0/T/F/TRUE/FALSE&quot; ...
 ##   ..$ actual  : chr [1:1666558] &quot;Burgenland&quot; &quot;Burgenland&quot; &quot;Burgenland&quot; &quot;Burgenland&quot; ...
 ##   ..$ file    : chr [1:1666558] &quot;&#39;../datasets/timeseries.csv&#39;&quot; &quot;&#39;../datasets/timeseries.csv&#39;&quot; &quot;&#39;../datasets/timeseries.csv&#39;&quot; &quot;&#39;../datasets/timeseries.csv&#39;&quot; ...
-##  - attr(*, &quot;spec&quot;)=
-##   .. cols(
-##   ..   locationID = col_character(),
-##   ..   slug = col_character(),
-##   ..   name = col_character(),
-##   ..   level = col_character(),
-##   ..   city = col_logical(),
-##   ..   county = col_logical(),
-##   ..   state = col_logical(),
-##   ..   country = col_character(),
-##   ..   lat = col_double(),
-##   ..   long = col_double(),
-##   ..   population = col_double(),
-##   ..   aggregate = col_logical(),
-##   ..   tz = col_character(),
-##   ..   cases = col_double(),
-##   ..   deaths = col_double(),
-##   ..   recovered = col_double(),
-##   ..   active = col_logical(),
-##   ..   tested = col_logical(),
-##   ..   hospitalized = col_logical(),
-##   ..   hospitalized_current = col_logical(),
-##   ..   discharged = col_logical(),
-##   ..   icu = col_logical(),
-##   ..   icu_current = col_logical(),
-##   ..   date = col_date(format = &quot;&quot;)
-##   .. )</code></pre>
+##  - attr(*, &quot;na.action&quot;)= &#39;omit&#39; Named int [1:894] 1 2 3 4 5 6 7 8 9 10 ...
+##   ..- attr(*, &quot;names&quot;)= chr [1:894] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...</code></pre>
+<pre class="r"><code>range(data$cases)</code></pre>
+<pre><code>## [1]    237 613076</code></pre>
+<pre class="r"><code>range(data$deaths)</code></pre>
+<pre><code>## [1]     1 25250</code></pre>
+<pre class="r"><code>range(data$recovered)</code></pre>
+<pre><code>## [1]      2 266287</code></pre>
+<pre class="r"><code>data_cases = data</code></pre>
 </div>
 <div id="seir-model-parameters" class="section level4">
 <h4>SEIR Model Parameters</h4>
 <pre class="r"><code>model_out = read_csv(&quot;../datasets/model_out.csv&quot;)</code></pre>
-<pre><code>## Parsed with column specification:
-## cols(
-##   state = col_character(),
-##   startdate = col_date(format = &quot;&quot;),
-##   enddate = col_date(format = &quot;&quot;),
-##   k = col_double(),
-##   sigma = col_double(),
-##   lamda = col_double(),
-##   c = col_double(),
-##   alpha = col_double(),
-##   omega = col_double(),
-##   miu = col_double()
-## )</code></pre>
 <pre class="r"><code>str(model_out)</code></pre>
 <pre><code>## tibble [73 × 10] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
 ##  $ state    : chr [1:73] &quot;Arizona&quot; &quot;Arizona&quot; &quot;Arizona&quot; &quot;Arizona&quot; ...
@@ -891,7 +611,33 @@ str(county_data_abridged)</code></pre>
 ##   ..   omega = col_double(),
 ##   ..   miu = col_double()
 ##   .. )</code></pre>
+<pre class="r"><code>data_parm = model_out</code></pre>
 </div>
+</div>
+<div id="combined-data-of-intersts" class="section level3">
+<h3>Combined Data of Intersts</h3>
+<pre class="r"><code>data = data.frame()</code></pre>
+</div>
+</div>
+<div id="modeling" class="section level2">
+<h2>Modeling</h2>
+<pre class="r"><code>model_fit_out = data.frame(0)</code></pre>
+</div>
+<div id="testing" class="section level2">
+<h2>Testing</h2>
+<pre class="r"><code>write.csv(model_fit_out, file = &quot;model_fit_out.csv&quot;)</code></pre>
+</div>
+<div id="project-intro" class="section level2">
+<h2>Project Intro</h2>
+<div id="draft-and-outline" class="section level3">
+<h3>Draft and Outline</h3>
+<ol style="list-style-type: decimal">
+<li><p>What we have achieved is a simple, interpretable, accessible model that anyone can get their hands on. It not only works towards assisting the prediction and prevention of pandemic, but also gives us clues on the relationship between variable social factors and the vulnerability of one place to the virus.</p></li>
+<li><p>This is our very first step to make our own contribution to the control of the pandemic. We believe that everyone can take a step to do their parts, and we need not be freaked out by the technological obstacles and the already-done achievements by the “professionals”.</p></li>
+<li><p>My partner and I are both undergraduates in non-CS majors, and this is our first time touching AWS or any other cloud service system. We started everything offline, accomplishing every tasks locally, and it did take us a while to figure out where to incorporate all those into AWS. But soon we see the enriched potentials and capability of AWS. Due to the limited time, we only took a slight bite of the AWS system, but we will be working to dig deeper.</p></li>
+<li><p>The next step to take is to integrate everything into an efficient cloud computing system so that larger data and more sophisticated models could be handled, especially in a well-automated manner.</p></li>
+<li><p>There are interested stuffs like the political factor. We may wanna see how it affects We have learned a lot from this experience and we are looking forwards to becoming professional data analytist…blabla</p></li>
+</ol>
 </div>
 </div>
 <div id="appendix" class="section level2">

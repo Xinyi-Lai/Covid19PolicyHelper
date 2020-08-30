@@ -1,13 +1,17 @@
 unnamed-chunk-1	library	read_csv
-unnamed-chunk-2	county_data_abridged	View
-unnamed-chunk-3	county_data_abridged	dim	names
-unnamed-chunk-4	
-unnamed-chunk-5	county_data_abridged	str
+unnamed-chunk-2	county_data_abridged	dim	names
+unnamed-chunk-3	[<-	==	colnames	colnames<-
+unnamed-chunk-4	$	$<-	above_50_gatherings	above_500_gatherings	c	county_data_abridged	CountyName	DiabetesPercentage	droplevels	entertainment_gym	HeartDiseaseMortality	Hospitals	HospParticipatinginNetwork2017	ICU_beds	na.omit	POP_LATITUDE	POP_LONGITUDE	PopTotalMale2017	PopulationDensityperSqMile2010	PopulationEstimate_above65_2017	PopulationEstimate2018	range	restaurant_dine_in	Smokers_Percentage	State	stay_at_home	str	StrokeMortality	subset
+unnamed-chunk-5	data
 unnamed-chunk-6	
 unnamed-chunk-7	read_csv
-unnamed-chunk-8	str	timeseries
-unnamed-chunk-9	read_csv
-unnamed-chunk-10	str	timeseries
+unnamed-chunk-8	!	&	==	$	$<-	as.character	as.factor	as.numeric	c	cases	country	date	deaths	droplevels	level	matrix	na.omit	name	recovered	state	str	strsplit	subset	timeseries	unlist
+unnamed-chunk-9	$	data	range
+unnamed-chunk-10	data
 unnamed-chunk-11	read_csv
 unnamed-chunk-12	model_out	str
 helper_functions	^	<	$	abline	abs	bptest	c	coef	dat_trn	dat_tst	exp	fitted	hatvalues	if	ifelse	length	list	mean	na.omit	par	plot	predict	qqline	qqnorm	resid	shapiro.test	sqrt	summary	unname
+unnamed-chunk-13	model_out
+unnamed-chunk-14	data.frame
+unnamed-chunk-15	data.frame
+unnamed-chunk-16	model_fit_out	write.csv

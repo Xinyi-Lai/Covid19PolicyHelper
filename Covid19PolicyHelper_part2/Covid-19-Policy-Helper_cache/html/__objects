@@ -1,13 +1,17 @@
 unnamed-chunk-1	county_data_abridged	.Random.seed
 unnamed-chunk-2	
-unnamed-chunk-3	
-unnamed-chunk-4	
-unnamed-chunk-5	
+unnamed-chunk-3	county_data_abridged
+unnamed-chunk-4	data
+unnamed-chunk-5	data_demographic
 unnamed-chunk-6	
 unnamed-chunk-7	timeseries
-unnamed-chunk-8	
-unnamed-chunk-9	timeseries
-unnamed-chunk-10	
+unnamed-chunk-8	data	StateOfInterest
+unnamed-chunk-9	
+unnamed-chunk-10	data_cases
 unnamed-chunk-11	model_out
 unnamed-chunk-12	
 helper_functions	
+unnamed-chunk-13	data_parm
+unnamed-chunk-14	data
+unnamed-chunk-15	model_fit_out
+unnamed-chunk-16	
