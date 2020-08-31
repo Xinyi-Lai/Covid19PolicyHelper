@@ -22,6 +22,13 @@ opts_chunk$set(cache = TRUE, autodep = TRUE)
 
 ## Data Preprocessing
 
+```{r}
+StateOfInterest = c("Arizona", "California", "Minnesota", "New Mexico", "New York", 
+                   "Oklahoma", "South Carolina", "Tennessee", "Utah", "Virginia", 
+                   "West Virginia", "Wisconsin")
+```
+
+
 ### County-Level Demographic Data
 ```{r message=FALSE}
 library(readr)
@@ -90,8 +97,10 @@ str(data)
 ```
 
 ```{r}
-data_demographic = data
+data_demographic_county = data
 ```
+
+
 
 
 ### County-Level Mobility Data
@@ -119,10 +128,6 @@ data$state = matrix(unlist(strsplit(as.character(data$name), ", ")), ncol = 2, b
 data = subset(data,
               select = c(state, date, cases, deaths, recovered))
 
-
-StateOfInterest = c("Arizona", "California", "Minnesota", "New Mexico", "New York", 
-                   "Oklahoma", "South Carolina", "Tennessee", "Utah", "Virginia", 
-                   "West Virginia", "Wisconsin")
 data = subset(data, state %in% StateOfInterest)
 
 data$state =     as.factor(data$state)
@@ -143,9 +148,8 @@ range(data$recovered)
 ```
 
 ```{r}
-data_cases = data
+data_cases_state = data
 ```
-
 
 #### SEIR Model Parameters
 ```{r message=FALSE, warning=FALSE}
@@ -163,14 +167,50 @@ data_parm = model_out
 ### Combined Data of Intersts
 
 ```{r}
-data = data.frame()
+data = data_parm
+# data$cases = subset(data_cases, state %in% data$state & date == data$startdate[data$state == state])
+
+n = length(data$state)
+data$cases = rep(0, n)
+data$deaths = rep(0, n)
+data$recovered = rep(0, n)
+
+for (i in 1:n){
+  j = data_cases_state$state == data$state[i] & data_cases_state$date == data$startdate[i]
+  if (sum(j) == 0){
+    data[i, ] = NA
+  }else{
+    data[i, c("cases", "deaths", "recovered")] = data_cases_state[j, c("cases", "deaths", "recovered")]
+  }
+}
+
+data = na.omit(data)
+
+data_demographic_state = as.data.frame(matrix(nrow = length(data$state), ncol = length(colnames(data_demographic_county)) - 1))
+colnames(data_demographic_state) = colnames(data_demographic_county)[colnames(data_demographic_county) != "CountyName"]
+data_demographic_state$State = data$state
+
+for (s in data_demographic_state$State){
+  for (k in 2:ncol(data_demographic_state)){
+    data_demographic_state[data_demographic_state$State == s, k] = 
+      mean(unlist(data_demographic_county[data_demographic_county$State == s, k+1]))
+  }
+}
+
+data = cbind(data, 
+             subset(data_demographic_state[, colnames(data_demographic_state)[colnames(data_demographic_state) != "State"]]))
+data = na.omit(data)
+
+View(data_demographic_county)
+View(data_demographic_state)
+View(data)
 ```
 
 
 ## Modeling
 
 ```{r}
-model_fit_out = data.frame(0)
+model_fit_out = data.frame()
 ```
 
 ## Testing

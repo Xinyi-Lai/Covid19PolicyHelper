@@ -404,6 +404,9 @@ summary {
 
 <div id="data-preprocessing" class="section level2">
 <h2>Data Preprocessing</h2>
+<pre class="r"><code>StateOfInterest = c(&quot;Arizona&quot;, &quot;California&quot;, &quot;Minnesota&quot;, &quot;New Mexico&quot;, &quot;New York&quot;, 
+                   &quot;Oklahoma&quot;, &quot;South Carolina&quot;, &quot;Tennessee&quot;, &quot;Utah&quot;, &quot;Virginia&quot;, 
+                   &quot;West Virginia&quot;, &quot;Wisconsin&quot;)</code></pre>
 <div id="county-level-demographic-data" class="section level3">
 <h3>County-Level Demographic Data</h3>
 <pre class="r"><code>library(readr)
@@ -525,7 +528,7 @@ str(data)</code></pre>
 ##  $ entertainment_gym              : num [1:2585] 16 16 16 16 16 16 16 16 16 16 ...
 ##  - attr(*, &quot;na.action&quot;)= &#39;omit&#39; Named int [1:659] 68 69 70 71 72 73 74 75 76 77 ...
 ##   ..- attr(*, &quot;names&quot;)= chr [1:659] &quot;68&quot; &quot;69&quot; &quot;70&quot; &quot;71&quot; ...</code></pre>
-<pre class="r"><code>data_demographic = data</code></pre>
+<pre class="r"><code>data_demographic_county = data</code></pre>
 </div>
 <div id="county-level-mobility-data" class="section level3">
 <h3>County-Level Mobility Data</h3>
@@ -546,10 +549,6 @@ data$state = matrix(unlist(strsplit(as.character(data$name), &quot;, &quot;)), n
 data = subset(data,
               select = c(state, date, cases, deaths, recovered))
 
-
-StateOfInterest = c(&quot;Arizona&quot;, &quot;California&quot;, &quot;Minnesota&quot;, &quot;New Mexico&quot;, &quot;New York&quot;, 
-                   &quot;Oklahoma&quot;, &quot;South Carolina&quot;, &quot;Tennessee&quot;, &quot;Utah&quot;, &quot;Virginia&quot;, 
-                   &quot;West Virginia&quot;, &quot;Wisconsin&quot;)
 data = subset(data, state %in% StateOfInterest)
 
 data$state =     as.factor(data$state)
@@ -581,7 +580,7 @@ str(data)</code></pre>
 <pre><code>## [1]     1 25250</code></pre>
 <pre class="r"><code>range(data$recovered)</code></pre>
 <pre><code>## [1]      2 266287</code></pre>
-<pre class="r"><code>data_cases = data</code></pre>
+<pre class="r"><code>data_cases_state = data</code></pre>
 </div>
 <div id="seir-model-parameters" class="section level4">
 <h4>SEIR Model Parameters</h4>
@@ -616,12 +615,48 @@ str(data)</code></pre>
 </div>
 <div id="combined-data-of-intersts" class="section level3">
 <h3>Combined Data of Intersts</h3>
-<pre class="r"><code>data = data.frame()</code></pre>
+<pre class="r"><code>data = data_parm
+# data$cases = subset(data_cases, state %in% data$state &amp; date == data$startdate[data$state == state])
+
+n = length(data$state)
+data$cases = rep(0, n)
+data$deaths = rep(0, n)
+data$recovered = rep(0, n)
+
+for (i in 1:n){
+  j = data_cases_state$state == data$state[i] &amp; data_cases_state$date == data$startdate[i]
+  if (sum(j) == 0){
+    data[i, ] = NA
+  }else{
+    data[i, c(&quot;cases&quot;, &quot;deaths&quot;, &quot;recovered&quot;)] = data_cases_state[j, c(&quot;cases&quot;, &quot;deaths&quot;, &quot;recovered&quot;)]
+  }
+}
+
+data = na.omit(data)
+
+data_demographic_state = as.data.frame(matrix(nrow = length(data$state), ncol = length(colnames(data_demographic_county)) - 1))
+colnames(data_demographic_state) = colnames(data_demographic_county)[colnames(data_demographic_county) != &quot;CountyName&quot;]
+data_demographic_state$State = data$state
+
+for (s in data_demographic_state$State){
+  for (k in 2:ncol(data_demographic_state)){
+    data_demographic_state[data_demographic_state$State == s, k] = 
+      mean(unlist(data_demographic_county[data_demographic_county$State == s, k+1]))
+  }
+}
+
+data = cbind(data, 
+             subset(data_demographic_state[, colnames(data_demographic_state)[colnames(data_demographic_state) != &quot;State&quot;]]))
+data = na.omit(data)
+
+View(data_demographic_county)
+View(data_demographic_state)
+View(data)</code></pre>
 </div>
 </div>
 <div id="modeling" class="section level2">
 <h2>Modeling</h2>
-<pre class="r"><code>model_fit_out = data.frame(0)</code></pre>
+<pre class="r"><code>model_fit_out = data.frame()</code></pre>
 </div>
 <div id="testing" class="section level2">
 <h2>Testing</h2>
