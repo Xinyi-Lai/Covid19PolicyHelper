@@ -29,7 +29,7 @@ StateOfInterest = c("Arizona", "California", "Minnesota", "New Mexico", "New Yor
 ```
 
 
-### County-Level Demographic Data
+### Demographic & Policy Data (County-Level)
 ```{r message=FALSE}
 library(readr)
 county_data_abridged = read_csv("county_data_abridged.csv")
@@ -101,17 +101,9 @@ data_demographic_county = data
 ```
 
 
+### Infection Data (State-Level)
 
-
-### County-Level Mobility Data
-
-```{r}
-
-```
-
-### County-Level Infection Data 
-
-#### Cases 
+#### Covid-19 Cases
 ```{r message=FALSE, warning=FALSE}
 timeseries = read_csv("../datasets/timeseries.csv")
 ```
@@ -164,11 +156,10 @@ str(model_out)
 data_parm = model_out
 ```
 
-### Combined Data of Intersts
+### Combined Data of Intersts (State-Level)
 
 ```{r}
 data = data_parm
-# data$cases = subset(data_cases, state %in% data$state & date == data$startdate[data$state == state])
 
 n = length(data$state)
 data$cases = rep(0, n)
@@ -200,14 +191,35 @@ for (s in data_demographic_state$State){
 data = cbind(data, 
              subset(data_demographic_state[, colnames(data_demographic_state)[colnames(data_demographic_state) != "State"]]))
 data = na.omit(data)
+```
 
-View(data_demographic_county)
-View(data_demographic_state)
-View(data)
+```{r}
+data$days = rep(0, nrow(data))
+data$temp = rep(0, nrow(data))
+for (i in 1:nrow(data)){
+  data$temp = diff.Date(c(data[i, ]$startdate, data[i, ]$enddate))
+}
+for (s in data$state){
+  for (d in 1:nrow(subset(data, state == s))){
+    data[data$state == s, "days"][d] = sum(subset(data, state == s)[1:d, "temp"])
+  }
+}
+data = data[, colnames(data)[colnames(data) != "temp"]]
+data_unamed = data[, colnames(data)[!(colnames(data) %in% c("state", "startdate", "enddate"))]]
 ```
 
 
-## Modeling
+```{r}
+# head(data_demographic_county, 10)
+# head(data_demographic_state, 10)
+# head(data[, c("state", "startdate", "enddate", "days")], 10)
+head(data, 10)
+```
+
+
+
+
+## Output Models
 
 ```{r}
 model_fit_out = data.frame()
@@ -237,6 +249,78 @@ We have learned a lot from this experience and we are looking forwards to becomi
 
 
 ## Appendix 
+
+
+### Modeling Procedures
+
+#### Data Points `pairs()` Plot
+
+<style>
+  .superbigimage{
+      overflow-x:scroll;
+      white-space: nowrap;
+  }
+
+  .superbigimage img{
+     max-width: none;
+  }
+  
+  
+</style>
+
+<div class="superbigimage">
+```{r, echo=FALSE, fig.width=30, fig.height=20}
+pairs(data_unamed, col = "dodgerblue")
+```
+</div>
+
+```{r eval=FALSE, include=FALSE}
+colnames(data_unamed)
+```
+
+#### Modeling `k`
+
+```{r}
+mod_k_1 = lm(k ~ days, data = data_unamed)
+mod_k_2 = lm(k ~ . - k, data = data_unamed)
+summary(mod_k_2)
+```
+
+#### Modeling `sigma`
+
+```{r}
+# mod_sigma = 
+```
+
+#### Modeling `lambda`
+
+```{r}
+# mod_lambda = 
+```
+
+#### Modeling `c`
+
+```{r}
+# mod_c = 
+```
+
+#### Modeling `alpha`
+
+```{r}
+# mod_alpha = 
+```
+
+#### Modeling `omega`
+
+```{r}
+# mod_omega = 
+```
+
+#### Modeling `miu`
+
+```{r}
+# mod_miu = 
+```
 
 ### Helper Functions 
 

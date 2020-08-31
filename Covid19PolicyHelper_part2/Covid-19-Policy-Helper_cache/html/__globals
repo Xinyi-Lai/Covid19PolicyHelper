@@ -4,15 +4,25 @@ unnamed-chunk-3	county_data_abridged	dim	names
 unnamed-chunk-4	[<-	==	colnames	colnames<-
 unnamed-chunk-5	$	$<-	above_50_gatherings	above_500_gatherings	c	county_data_abridged	CountyName	DiabetesPercentage	droplevels	entertainment_gym	HeartDiseaseMortality	Hospitals	HospParticipatinginNetwork2017	ICU_beds	na.omit	POP_LATITUDE	POP_LONGITUDE	PopTotalMale2017	PopulationDensityperSqMile2010	PopulationEstimate_above65_2017	PopulationEstimate2018	range	restaurant_dine_in	Smokers_Percentage	State	stay_at_home	str	StrokeMortality	subset
 unnamed-chunk-6	data
-unnamed-chunk-7	
-unnamed-chunk-8	read_csv
-unnamed-chunk-9	!	&	==	$	$<-	as.character	as.factor	as.numeric	c	cases	country	date	deaths	droplevels	level	matrix	na.omit	name	recovered	state	StateOfInterest	str	strsplit	subset	timeseries	unlist
-unnamed-chunk-10	$	data	range
-unnamed-chunk-11	data
-unnamed-chunk-12	read_csv
+unnamed-chunk-7	read_csv
+unnamed-chunk-8	!	&	==	$	$<-	as.character	as.factor	as.numeric	c	cases	country	date	deaths	droplevels	level	matrix	na.omit	name	recovered	state	StateOfInterest	str	strsplit	subset	timeseries	unlist
+unnamed-chunk-9	$	data	range
+unnamed-chunk-10	data
+unnamed-chunk-11	read_csv
+unnamed-chunk-12	model_out	str
 helper_functions	^	<	$	abline	abs	bptest	c	coef	dat_trn	dat_tst	exp	fitted	hatvalues	if	ifelse	length	list	mean	na.omit	par	plot	predict	qqline	qqnorm	resid	shapiro.test	sqrt	summary	unname
-unnamed-chunk-13	model_out	str
-unnamed-chunk-14	model_out
-unnamed-chunk-15	!=	[<-	&	==	$	$<-	as.data.frame	c	cbind	colnames	colnames<-	data_cases_state	data_demographic_county	data_parm	for	if	length	matrix	mean	na.omit	ncol	rep	subset	sum	unlist	View
-unnamed-chunk-16	data.frame
-unnamed-chunk-17	model_fit_out	write.csv
+unnamed-chunk-13	model_out
+unnamed-chunk-14	!=	[<-	&	==	$	$<-	as.data.frame	c	cbind	colnames	colnames<-	data_cases_state	data_demographic_county	data_parm	for	if	length	matrix	mean	na.omit	ncol	rep	subset	sum	unlist
+unnamed-chunk-15	!	!=	[<-	==	$	$<-	c	colnames	diff.Date	for	nrow	rep	state	subset	sum
+unnamed-chunk-16	data	head
+unnamed-chunk-17	data.frame
+unnamed-chunk-18	model_fit_out	write.csv
+unnamed-chunk-19	data_unamed	pairs
+unnamed-chunk-20	colnames	data_unamed
+unnamed-chunk-21	~	data_unamed	lm	summary
+unnamed-chunk-22	
+unnamed-chunk-23	
+unnamed-chunk-24	
+unnamed-chunk-25	
+unnamed-chunk-26	
+unnamed-chunk-27	
