@@ -85,7 +85,7 @@ Therefore, we have a set of differential equations to describe this process:
 
 Apply to our datasets, we have:
 
-![equations2](https://github.com/Xinyi-Lai/Covid19PolicyHelper/raw/master/equatio2.png)
+![equations2](https://github.com/Xinyi-Lai/Covid19PolicyHelper/raw/master/equation2.png)
 
 Running the model for each state for every 15-day period with appropriate data, we got the best parameters fitting the models for each state and time period.
 
