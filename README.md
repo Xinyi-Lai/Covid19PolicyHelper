@@ -5,13 +5,11 @@
 Covid-19 Policy Decision Helper
 
 ## Here's the elevator pitch
-> What's your idea? This will be a short tagline for the project
 
 Predictive modeling of Covid-19 transmission that helps policymakers make the best decisions to control mortality with the least costs.
 
 
 ## It's built with
-> What languages, APIs, hardware, hosts, libraries, UI Kits or frameworks are you using?
 
 **Languages**
 - Python, R, Markdown, HTML
@@ -30,7 +28,6 @@ Predictive modeling of Covid-19 transmission that helps policymakers make the be
 ---
 
 ## Here's the whole story
-> Be sure to write what inspired you, what you learned, how you built, and the challenges you faced.
 
 ### Inspiration
 
