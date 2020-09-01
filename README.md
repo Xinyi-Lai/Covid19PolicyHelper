@@ -17,7 +17,7 @@ Predictive modeling of Covid-19 transmission that helps policymakers make the be
 - Python, R, Markdown, HTML
 
 **AWS services**
-AWS Data Exchange, EC2, AMI, RDS
+- AWS Data Exchange, EC2, AMI, RDS
 
 **Libraries**
 - R:  `lmtest`
@@ -52,7 +52,7 @@ We think that it will be interesting to model the dynamics of viral transmission
 ### How we built it
 
 
-#### Part 0: Data
+#### Part O: Data
 
 Data source from **AWS Data Exchange**:
 
@@ -64,7 +64,7 @@ Complementary sources:
 - [Corona Data Scraper page](https://coronadatascraper.com/#home)
 
 
-#### Part 1: SEIR infection model
+#### Part I: SEIR infection model
 
 After preprocessing, we fetched the state-level time-series data of cases, deaths, recovered, hospitalized, date, and population.
 
