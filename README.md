@@ -98,7 +98,15 @@ Running the model for each state for every 15-day period with appropriate data, 
 
 #### Part II: backward optimization
 
-Considering the physical meaning of all the parameters in the above SEIR model, an important limit to the control of the pandemic is medical resources. In other words, $k, \mu, \omega$ depends on the temporal situations of each states or countries. Another limit is the inherent feature of the COVID-19 virus itself, i.e. $\sigma$ and $\alpha$. 
+Consider the physical meaning of all the parameters in the above SEIR model:
+* $\lambda$, $c\lambda$: infection rate, which should have a direct relationship with the strength of the control policy (how many days should people in self-quarantine stay at home, how strict should the quarantine be, how should social distancing be enforced, whether or not people are required to wear a mask, etc).
+* $\sigma$: we choose $\sigma = 1/14$ because the incubation period is 14 days on average.
+* $k$: the proportion of positive cases that are not hospitalized, which should have a relationship with the current medical resources such as the number of hospital beds.
+* $\mu, \omega$: recover rate and death rate, which should have a relationship with the current medical resources and the health condition of the population.
+* $\alpha$: immunity lost rate, it depends on the characteristic of the virus and sometimes relates to the testing methods.
+
+Among all above, an important limit to the control of the pandemic is medical resources. In other words, $k, \mu, \omega$ depends on the temporal situations of each states or countries. Another limit is the inherent feature of the COVID-19 virus itself, i.e. $\sigma$ and $\alpha$. 
+
 However, the policy maker can decide on the control policy, which directly affects $\lambda$ and $c\lambda$. We know that the control policy is like a double-edged sword: if it is too strict, it would have a bad impact on the economy and people's social life; but if it is too relaxed, the pandemic will soon lose control, causing even more severe consequences.
 
 Therefore, our solution is trying to find the best set of transmission parameters $\lambda$ and $c$ using optimization methods.
@@ -193,6 +201,7 @@ Also, in part 3, we should have been able to at least get some clue of the signi
 
 ### Accomplishments that we're proud of 
 
+- We modified the classical SEIR model to fit the COVID-19 pandemic by considering the people in "quarantine" and making use of the hospitalized data. To our suprise, simple as our model seems, it fits the real data pretty well. Also, we found that by controling the transmission parameters, even if with a small change, the outcome may be completely different, which reveals the importance of policymaking.
 - Some models we obtained in part 3, though simple, are performing quite well regarding the model diagonostics and prediction making metrics, implying that those are models 
 - We did find out some really interesting relationships between the development of a pandemic and the social/environmental conditions of a state. Simple models tell a big story. The models that engage geographic and demographic predictors as significant factors should raise our awareness of the importance of geographic and demographic factors in decision making. 
 
