@@ -45,16 +45,82 @@ We think that it will be interesting to model the dynamics of the viral transmis
     We modeled the relationship between the transmission parameters and the environmental factors. Given the optimal parameters obtianed above, we can determine the corresponding optimal policy and the value of environmental factors.
 
 
+
 ### How we built it
 
-#### Part I: SEIR model
-    We first build a dynamic model for the viral transmission. We correct
+
+#### Part 0: Data
+
+The dataset we used is the Global Coronavirus (COVID-19) Data (Corona Data Scraper) provided by Enigma. 
+
+[AWS product link](https://aws.amazon.com/marketplace/pp/prodview-vtnf3vvvheqzw?qid=1597409751562&sr=0-1&ref_=brs_res_product_title#overview)
+[Corona Data Scraper page](https://coronadatascraper.com/#home)
+
+After preprocessing, we fetched the state-level timeseries data of cases, deaths, recovered, hospitalized, data and population.
+
+
+#### Part 1: SEIR infection model
+
+We built a viral transmission model based on the classical SEIR model with some modifications. 
+![title](model.png)
+
+We Assume...
+
+* Susceptible (S): healthy people, will be infected and turn into E after close contact with E or Q.
+* Exposed (E): infected but have no symptoms yet, infectious with a rate of $\lambda$. E will turn into I after the virus incubation period, which is 14 days on average. So we assume $\sigma = 1/14$, dE/dt (t) = dI/dt (t+14).
+* Infectious (I): infected and have symptoms. We will take the data of test_positive or cases_reported as the data of I. The severe cases will be hospitalized (H), the mild cases will be in self quarantine (Q). I may recover or die after some time.
+    * Self Quarantine (Q): have symptoms, may still have some contact with others, thus infectious with a different rate of $c\lambda$ ($0 \le c \le 1$). We also assume $Q = kI$, where $k = 1 - avg(\frac{\Delta hospitalized}{\Delta test\_pos}) $
+    * Hospitalized (H): have symptoms, kept in hospitals, assume no contact with S. 
+* Recovered (R): recovered and immune, may turn into S again (immunity lost or virus not cleared)
+* Dead (X): dead unfortunately :(
+
+
+Therefore, we have a set of differential equations to describe this process:
+
+$\begin{aligned}
+&\frac{dS}{dt}&
+&=& - \lambda \frac{S}{N} E - c\lambda \frac{S}{N} Q + \alpha R ~~~
+&=& - \lambda \frac{S}{N} E - c\lambda \frac{S}{N} kI + \alpha R
+\\
+&\frac{dE}{dt}&
+&=&   \lambda \frac{S}{N} E + c\lambda \frac{S}{N} Q - \sigma E ~~~
+&=&   \lambda \frac{S}{N} E + c\lambda \frac{S}{N} kI - \sigma E
+\\
+&\frac{dI}{dt}&
+&=& \sigma E - \mu I - \omega I 
+\\
+&\frac{dX}{dt}&
+&=& \omega I 
+\\
+&\frac{dR}{dt}&
+&=& \mu I - \alpha R 
+\end{aligned}$
+
+$S + E + I + R + X = N,~ I = Q + H$
+
+
+Apply to our datasets, we have:
+
+$ R = recovered,~ X = deaths,~ I = test\_pos - deaths - recovered,\\
+E(t) = I(t+14) - I(t),~ S = N - E - I - R - X,\\
+k = 1 - avg(\frac{\Delta hospitalized}{\Delta test\_pos})
+$
+
+
 
     and by controlling the transmission parameters, we can model the future trend of the pandemic under different circumstances. 
 
 #### Part II: backward optimization
 
+
+
+
+
 #### Part III: environmental factors modeling
+
+
+
+
 
 
 ### Challenges we ran into
