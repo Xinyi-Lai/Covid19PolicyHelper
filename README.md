@@ -77,9 +77,9 @@ We Assume...
 
 Therefore, we have a set of differential equations to describe this process:
 
-![](http://latex.codecogs.com/gif.latex?\\$\begin{aligned} &\frac{dS}{dt}& &=& - \lambda \frac{S}{N} E - c\lambda \frac{S}{N} Q + \alpha R ~~~ &=& - \lambda \frac{S}{N} E - c\lambda \frac{S}{N} kI + \alpha R \\ &\frac{dE}{dt}& &=&   \lambda \frac{S}{N} E + c\lambda \frac{S}{N} Q - \sigma E ~~~ &=&   \lambda \frac{S}{N} E + c\lambda \frac{S}{N} kI - \sigma E \\ &\frac{dI}{dt}& &=& \sigma E - \mu I - \omega I  \\ &\frac{dX}{dt}& &=& \omega I  \\ &\frac{dR}{dt}& &=& \mu I - \alpha R  \end{aligned}$)
+![](http://latex.codecogs.com/gif.latex?\\$\begin{aligned}&\frac{dS}{dt}&&=&-\lambda\frac{S}{N}E - c\lambda \frac{S}{N} Q + \alpha R ~~~ &=& - \lambda \frac{S}{N} E - c\lambda \frac{S}{N} kI + \alpha R \\ &\frac{dE}{dt}& &=&   \lambda \frac{S}{N} E + c\lambda \frac{S}{N} Q - \sigma E ~~~ &=&   \lambda \frac{S}{N} E + c\lambda \frac{S}{N} kI - \sigma E \\ &\frac{dI}{dt}& &=& \sigma E - \mu I - \omega I  \\ &\frac{dX}{dt}& &=& \omega I  \\ &\frac{dR}{dt}& &=& \mu I - \alpha R  \end{aligned}$)
 
-$S + E + I + R + X = N,~ I = Q + H$
+![](http://latex.codecogs.com/gif.latex?\\$S+E+I+R+X=N,~I=Q+H$)
 
 
 Apply to our datasets, we have:
