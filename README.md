@@ -14,28 +14,18 @@ Predictive modeling of Covid-19 transmission that helps policymakers make the be
 > What languages, APIs, hardware, hosts, libraries, UI Kits or frameworks are you using?
 
 **Languages**
-- Python
-- R
-- Others: Markdown, HTML
+- Python, R, Markdown, HTML
 
 **AWS services**
-- AWS Data Exchange
-- EC2
-- AMI
-- RDS
+AWS Data Exchange, EC2, AMI, RDS
 
 **Libraries**
-- R: 
-    - `lmtest`
-- Python:
-    -  `pandas`
-    - `numpy`
-    - `pylab`
-    - `scipy.optimize`
-    - `scipy.integrate`
+- R:  `lmtest`
+- Python:  `pandas`, `numpy`, `pylab`, `scipy.optimize`, `scipy.integrate`
 
 ## Created by
-Yulin Li (yulinl2@illinois.edu), Xinyi Lai (xlai7@illinois.edu)
+- Xinyi Lai (xlai7@illinois.edu)
+- Yulin Li (yulinl2@illinois.edu)
 
 ---
 
