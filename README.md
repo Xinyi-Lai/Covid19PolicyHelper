@@ -62,7 +62,7 @@ After preprocessing, we fetched the state-level timeseries data of cases, deaths
 #### Part 1: SEIR infection model
 
 We built a viral transmission model based on the classical SEIR model with some modifications. 
-![title](https://github.com/Xinyi-Lai/Covid19PolicyHelper/blob/master/model.png)
+![modified SEIR model](https://github.com/Xinyi-Lai/Covid19PolicyHelper/raw/master/model.png)
 
 We Assume...
 
@@ -77,26 +77,7 @@ We Assume...
 
 Therefore, we have a set of differential equations to describe this process:
 
-![](http://latex.codecogs.com/gif.latex?\\frac{1}{1+sin(x)})
-
-$\begin{aligned}
-&\frac{dS}{dt}&
-&=& - \lambda \frac{S}{N} E - c\lambda \frac{S}{N} Q + \alpha R ~~~
-&=& - \lambda \frac{S}{N} E - c\lambda \frac{S}{N} kI + \alpha R
-\\
-&\frac{dE}{dt}&
-&=&   \lambda \frac{S}{N} E + c\lambda \frac{S}{N} Q - \sigma E ~~~
-&=&   \lambda \frac{S}{N} E + c\lambda \frac{S}{N} kI - \sigma E
-\\
-&\frac{dI}{dt}&
-&=& \sigma E - \mu I - \omega I 
-\\
-&\frac{dX}{dt}&
-&=& \omega I 
-\\
-&\frac{dR}{dt}&
-&=& \mu I - \alpha R 
-\end{aligned}$
+![](http://latex.codecogs.com/gif.latex?\\$\begin{aligned} &\frac{dS}{dt}& &=& - \lambda \frac{S}{N} E - c\lambda \frac{S}{N} Q + \alpha R ~~~ &=& - \lambda \frac{S}{N} E - c\lambda \frac{S}{N} kI + \alpha R \\ &\frac{dE}{dt}& &=&   \lambda \frac{S}{N} E + c\lambda \frac{S}{N} Q - \sigma E ~~~ &=&   \lambda \frac{S}{N} E + c\lambda \frac{S}{N} kI - \sigma E \\ &\frac{dI}{dt}& &=& \sigma E - \mu I - \omega I  \\ &\frac{dX}{dt}& &=& \omega I  \\ &\frac{dR}{dt}& &=& \mu I - \alpha R  \end{aligned}$)
 
 $S + E + I + R + X = N,~ I = Q + H$
 
