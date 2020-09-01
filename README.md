@@ -18,10 +18,29 @@ Predictive modeling of Covid-19 transmission that helps policy makers make best 
 ## It's built with
 > What languages, APIs, hardware, hosts, libraries, UI Kits or frameworks are you using?
 
-......
+**Languages**
+- Python
+- R
+- Others: Markdown, HTML
+
+**AWS services**
+- AWS Data Exchange
+- EC2
+- AMI
+- RDS
+
+**Libraries**
+- R: 
+    - `lmtest`
+- Python:
+    -  `pandas`
+    - `numpy`
+    - `pylab`
+    - `scipy.optimize`
+    - `scipy.integrate`
 
 ## Created by
-Yulin Li, Xinyi Lai
+Yulin Li (yulinl2@illinois.edu), Xinyi Lai (xlai7@illinois.edu)
 
 ---
 
@@ -51,12 +70,16 @@ We think that it will be interesting to model the dynamics of the viral transmis
 
 #### Part 0: Data
 
-The dataset we used is the Global Coronavirus (COVID-19) Data (Corona Data Scraper) provided by Enigma. 
+Data source from **AWS Data Exchange**:
 
-[AWS product link](https://aws.amazon.com/marketplace/pp/prodview-vtnf3vvvheqzw?qid=1597409751562&sr=0-1&ref_=brs_res_product_title#overview)
-[Corona Data Scraper page](https://coronadatascraper.com/#home)
+- [Global Coronavirus (COVID-19) Data (Corona Data Scraper)](https://aws.amazon.com/marketplace/pp/prodview-vtnf3vvvheqzw?qid=1597409751562&sr=0-1&ref_=brs_res_product_title#overview) provided by Enigma
+- [COVID-19 Prediction Models Counties & Hospitals | Yu Group (UC Berkeley)](https://aws.amazon.com/marketplace/pp/prodview-px2tvvydirx4o?qid=1587582026402&sr=0-1&ref_=srh_res_product_title#overview) provided by Rearc
 
-After preprocessing, we fetched the state-level timeseries data of cases, deaths, recovered, hospitalized, data and population.
+Complementary sources:
+
+- [Corona Data Scraper page](https://coronadatascraper.com/#home)
+
+After preprocessing, we fetched the state-level timeseries data of cases, deaths, recovered, hospitalized, data and population for SEIR modeling.
 
 
 #### Part 1: SEIR infection model
@@ -101,15 +124,89 @@ $
 
 #### Part III: environmental factors modeling
 
+Finally, we attempted to model the relationships between the SEIR model parameters and a variety of social/environmental factors, including demographic, medical and policy factors. We aim at obtaining models that are interpretive as well as predictive; in order words, we are hoping to find models that are simple, accessible and easy to be understood, so that people can gain some insights of what is significant to the way a pandemic develops, but at the same time, we are also searching for models among those explainable models that are most helpful for prediction making. 
+
+With such goals in mind, we engaged a relatively small number of variables in our study--variables that seem most significant to us intuitively, from the most accessible open data source. 
+
+The variables engaged in the study are the following: 
+
+- SEIR model parameters: 
+    - `k`
+    - `sigma`
+    - `lamda`
+    - `c`
+    - `alpha`
+    - `omega`
+    - `miu`
+    
+- Geographic factors (state-level data, obtained by taking averages of county-level data): 
+    - `POP_LATITUDE`: latitute of population center
+    - `POP_LONGITUDE`: latitute of population center 
+    
+- Demographic factors (state-level data, obtained by taking averages of county-level data): 
+    - `PopulationEstimate2018`: estimated total population in 2018
+    - `PopTotalMale2017`: total population of male in 2017
+    - `PopulationEstimate_above65_2017`: total population above 65 years of age in 2017
+    - `PopulationDensityperSqMile2010`: population density per square mile in 2010
+    - `DiabetesPercentage`: estimated age-adjusted percentage of diagnosed diabetes in 2016
+    - `Smokers_Percentage`: estimated percentage of adult smokers in 2017
+    - `HeartDiseaseMortality`: estimated mortality rate per 100,000 from all heart diseases
+    - `StrokeMortality`: estimated mortality rate per 100,000 from all strokes
+    
+- Medical resouce (state-level data, obtained by taking averages of county-level data): 
+    - `Hospitals`
+    - `ICU_beds`
+    - `HospParticipatinginNetwork2017`: number of hospitals participating in network in 2017
+    
+- Current situation:
+    - `cases`
+    - `deaths`
+    - `recovered`
+    - `days`: days since the first day of SEIR modeling
+
+- State policy (released date)
+    - `stay_at_home`
+    - `above_50_gatherings`
+    - `above_500_gatherings`
+    - `restaurant_dine_in`
+    - `entertainment_gym`
+    
+
+The **modeling methods** we applied include the following: 
+
+- Data cleaning as necessary to address observations with missing or extreme values.
+- Multiple linear regression
+- ANOVA (codes omitted)
+- Interaction (codes omitted)
+- Residual diagnostics
+- Transformations
+- Polynomial regression
+- Stepwise model selection (AIC & BIC) (codes omitted)
+- Variable selection (codes omitted)
+- Test/train splitting
 
 
+As we should know, in multiple-variable modeling, there is not necessarily one, singular correct answer/model, although certainly some methods and models are more useful and would perform better than others depending on the data we choose. The same happens to this project. In this part, we collected a variety of models corresponding to each SEIR parameter, which performs similarly but are sometimes different in a radical way. 
+
+For example, there were two models that reaches approximately the same error level when predicting the response variable `k`. However, 
 
 
+### Challenges we ran into 
 
-### Challenges we ran into
+In part 3, we should be able to get some clue of the relationship between the state policies and the other variables. However, the 
 
-### Accomplishments that we're proud of
+### Accomplishments that we're proud of 
 
-### What we learned
+1. We did find out some really interesting relationships between the development of a pandemic and the social/environmental conditions of a state. Simple models tell a big story. 
+
+Usually, we would not be explicitly considering the geographic
+
+### What we learned 
+
+Both partners of our team are undergraduates in non-CS majors, and this is our first time touching AWS or any other cloud service system. It did take us a while to figure out where to incorporate all those into AWS, but soon we saw the great potentials and capability of AWS. 
 
 ### What's next for Covid-19 Policy Decision Helper
+
+As mentioned in the beginning, the final goal of this project is to solve for a set, or a range, of best policy parameters conditioned by the social/environmental factors of a state. 
+
+
