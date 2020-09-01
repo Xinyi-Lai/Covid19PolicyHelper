@@ -1,3 +1,5 @@
 base
 knitr
 readr
+zoo
+lmtest

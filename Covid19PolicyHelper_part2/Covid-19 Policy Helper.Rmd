@@ -19,6 +19,89 @@ library(knitr)
 opts_chunk$set(cache = TRUE, autodep = TRUE)
 ```
 
+## Project Intro
+
+wait
+	
+
+
+
+```{r echo=FALSE}
+library(lmtest)
+
+get_bp_decision = function(model, alpha) {
+  decide = unname(bptest(model)$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_bp_pval = function(model) {
+  bptest(model)$p.value
+}
+
+get_sw_decision = function(model, alpha) {
+  decide = unname(shapiro.test(resid(model))$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_sw_pval = function(model) {
+  shapiro.test(resid(model))$p.value
+}
+
+get_num_params = function(model) {
+  length(coef(model))
+}
+
+get_loocv_rmse = function(model, is_log) {
+  ifelse(
+    is_log, 
+    sqrt(mean(na.omit(((dat_trn$price - exp(fitted(model))) / (1 - hatvalues(model))) ^ 2))),
+    sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+  )
+}
+
+get_adj_r2 = function(model) {
+  summary(model)$adj.r.squared
+}
+
+test_mod = function(model, is_log = FALSE, k = 1){
+  c(loocv_rmse = get_loocv_rmse(model, is_log), 
+    adj_r2 = get_adj_r2(model), 
+    bp_pval = get_bp_pval(model), 
+    sw_pval = get_sw_pval(model), 
+    num_params = get_num_params(model), 
+    test_rmse = get_test_rmse(model, k), 
+    perc_err = get_perc_err(model, k))
+}
+
+diagnostics = function(model, pcol = "grey", lcol = "dodgerblue", alpha = 0.05, plotit = TRUE, testit = TRUE){
+  if (plotit){
+    par(mfrow = c(1, 2), pty="s")
+    
+    plot(fitted(model), resid(model), col = "grey", pch = 20, 
+         xlab = "Fitted", ylab = "Residual", 
+         main = "Fitted versus Residuals")
+    abline(h = 0, col = "darkorange", lwd = 2)
+    
+    qqnorm(resid(model), col = pcol)
+    qqline(resid(model), col = lcol, lwd = 2)
+  }
+  if (testit){
+    list(p_val = shapiro.test(resid(model))$p, 
+         decision = ifelse(test = shapiro.test(resid(model))$p < alpha, 
+                           yes = "Reject", no = "Fail to Reject"))
+  }
+}
+
+get_test_rmse = function(model, k) {
+  sqrt(mean((data_tst[, k] - predict(model, newdata = data_tst))^ 2))
+}
+
+get_perc_err = function(model, k) {
+  actual = data_tst[, k]
+  predicted = predict(model, newdata = data_tst)
+  100 * mean((abs(actual - predicted)) / actual)
+}
+```
 
 ## Data Preprocessing
 
@@ -218,40 +301,7 @@ head(data, 10)
 
 
 
-
-## Output Models
-
-```{r}
-model_fit_out = data.frame()
-```
-
-## Testing
-
-```{r}
-write.csv(model_fit_out, file = "model_fit_out.csv")
-```
-
-
-## Project Intro
-
-### Draft and Outline
-	
-1. What we have achieved is a simple, interpretable, accessible model that anyone can get their hands on. It not only works towards assisting the prediction and prevention of pandemic, but also gives us clues on the relationship between variable social factors and the vulnerability of one place to the virus. 
-
-2. This is our very first step to make our own contribution to the control of the pandemic. We believe that everyone can take a step to do their parts, and we need not be freaked out by the technological obstacles and the already-done achievements by the "professionals".
-
-3. My partner and I are both undergraduates in non-CS majors, and this is our first time touching AWS or any other cloud service system. We started everything offline, accomplishing every tasks locally, and it did take us a while to figure out where to incorporate all those into AWS. But soon we see the enriched potentials and capability of AWS. Due to the limited time, we only took a slight bite of the AWS system, but we will be working to dig deeper. 
-
-4. The next step to take is to integrate everything into an efficient cloud computing system so that larger data and more sophisticated models could be handled, especially in a well-automated manner.  
-
-5. There are interested stuffs like the political factor. We may wanna see how it affects 
-We have learned a lot from this experience and we are looking forwards to becoming professional data analytist…blabla
-
-
-## Appendix 
-
-
-### Modeling Procedures
+## Modeling & Testing Procedures
 
 #### Data Points `pairs()` Plot
 
@@ -278,49 +328,134 @@ pairs(data_unamed, col = "dodgerblue")
 colnames(data_unamed)
 ```
 
-#### Modeling `k`
-
 ```{r}
-mod_k_1 = lm(k ~ days, data = data_unamed)
-mod_k_2 = lm(k ~ . - k, data = data_unamed)
-summary(mod_k_2)
+set.seed(42)
+num_obs = nrow(data_unamed) # total number of observations
+num_trn = round(num_obs * 0.90) # number of observations for the training data
+
+trn_idx = sample(num_obs, num_trn) # randomly generate the index for the training data
+data_trn = data_unamed[trn_idx, ] # training data
+data_tst = data_unamed[-trn_idx, ] # testing data
 ```
 
-#### Modeling `sigma`
+### Modeling `k`
+```{r}
+# full additive model
+mod_k_full = lm(k ~ ., data = data_trn)
+test_mod(mod_k_full, k = 1)
+summary(mod_k_full)
+```
+
+
+```{r}
+# small additive model
+mod_k_1 = lm(k ~ days, data = data_trn)
+# large additive model
+mod_k_2 = lm(k ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma, data = data_trn)
+
+test_mod(mod_k_1, k = 1)
+test_mod(mod_k_2, k = 1)
+summary(mod_k_1)
+summary(mod_k_2)
+```
+```{r}
+# intermediate model
+mod_k_3 = lm(k ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 
+             + log(days) - days
+             + stay_at_home - PopulationEstimate2018 - PopTotalMale2017
+             + I(POP_LATITUDE ^ 2) +  + I(POP_LONGITUDE ^ 2), 
+             data = data_trn)
+mod_k_4 = lm(k ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 + 
+               log(days) - days, 
+             data = data_trn)
+
+test_mod(mod_k_1, k = 1)
+test_mod(mod_k_2, k = 1)
+test_mod(mod_k_3, k = 1)
+test_mod(mod_k_4, k = 1)
+summary(mod_k_3)
+summary(mod_k_4)
+```
+
+```{r}
+# intermediate model 
+# relatively bad models
+mod_k_5 = lm(k ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - (lamda + c + alpha + omega + miu), 
+             data = data_trn)
+mod_k_6 = lm(k ~ lamda + c + alpha + omega + miu, 
+             data = data_trn)
+
+test_mod(mod_k_1, k = 1)
+test_mod(mod_k_2, k = 1)
+test_mod(mod_k_3, k = 1)
+test_mod(mod_k_4, k = 1)
+test_mod(mod_k_5, k = 1)
+test_mod(mod_k_6, k = 1)
+summary(mod_k_5)
+summary(mod_k_6)
+```
+
+```{r}
+mod_k = mod_k_5
+diagnostics(mod_k, testit = FALSE)
+```
+
+### Modeling `sigma`
 
 ```{r}
 # mod_sigma = 
 ```
 
-#### Modeling `lambda`
+### Modeling `lambda`
 
 ```{r}
 # mod_lambda = 
 ```
 
-#### Modeling `c`
+### Modeling `c`
 
 ```{r}
 # mod_c = 
 ```
 
-#### Modeling `alpha`
+### Modeling `alpha`
 
 ```{r}
 # mod_alpha = 
 ```
 
-#### Modeling `omega`
+### Modeling `omega`
 
 ```{r}
 # mod_omega = 
 ```
 
-#### Modeling `miu`
+### Modeling `miu`
 
 ```{r}
 # mod_miu = 
 ```
+
+
+## Discussion
+
+wait
+
+1. What we have achieved is a simple, interpretable, accessible model that anyone can get their hands on. It not only works towards assisting the prediction and prevention of pandemic, but also gives us clues on the relationship between variable social factors and the vulnerability of one place to the virus. 
+
+2. This is our very first step to make our own contribution to the control of the pandemic. We believe that everyone can take a step to do their parts, and we need not be freaked out by the technological obstacles and the already-done achievements by the "professionals".
+
+3. My partner and I are both undergraduates in non-CS majors, and this is our first time touching AWS or any other cloud service system. We started everything offline, accomplishing every tasks locally, and it did take us a while to figure out where to incorporate all those into AWS. But soon we see the enriched potentials and capability of AWS. Due to the limited time, we only took a slight bite of the AWS system, but we will be working to dig deeper. 
+
+4. The next step to take is to integrate everything into an efficient cloud computing system so that larger data and more sophisticated models could be handled, especially in a well-automated manner.  
+
+5. There are interesting stuffs like the political factor. We may wanna see how it affects 
+We have learned a lot from this experience and we are looking forwards to becoming professional data analytist…blabla
+
+## Appendix 
 
 ### Helper Functions 
 
@@ -359,12 +494,14 @@ get_adj_r2 = function(model) {
   summary(model)$adj.r.squared
 }
 
-test_mod = function(model, is_log = FALSE){
+test_mod = function(model, is_log = FALSE, k = 1){
   c(loocv_rmse = get_loocv_rmse(model, is_log), 
     adj_r2 = get_adj_r2(model), 
     bp_pval = get_bp_pval(model), 
     sw_pval = get_sw_pval(model), 
-    num_params = get_num_params(model))
+    num_params = get_num_params(model), 
+    test_rmse = get_test_rmse(model, k), 
+    perc_err = get_perc_err(model, k))
 }
 
 diagnostics = function(model, pcol = "grey", lcol = "dodgerblue", alpha = 0.05, plotit = TRUE, testit = TRUE){
@@ -386,13 +523,13 @@ diagnostics = function(model, pcol = "grey", lcol = "dodgerblue", alpha = 0.05, 
   }
 }
 
-get_test_rmse = function(model) {
-  sqrt(mean((dat_tst$price - predict(model, newdata = dat_tst))^ 2))
+get_test_rmse = function(model, k) {
+  sqrt(mean((data_tst[, k] - predict(model, newdata = data_tst))^ 2))
 }
 
-get_perc_err = function(model) {
-  actual = dat_tst$price
-  predicted = predict(model, dat_tst)
+get_perc_err = function(model, k) {
+  actual = data_tst[, k]
+  predicted = predict(model, newdata = data_tst)
   100 * mean((abs(actual - predicted)) / actual)
 }
 ```
