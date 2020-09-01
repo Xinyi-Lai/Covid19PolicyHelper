@@ -193,7 +193,7 @@ As we should know, in multiple-variable modeling, there is not necessarily one, 
 
 2. Geographic and demographic predictors are more useful and more important than we used to think. 
 
-Surprisingly, variables such as total population--instead of population density--and lattitude/longitude appear statistically significant as predictors in the models predicting transmission rate of the virus, while variables that seems intuitively important, such as population density, medical resource and policy information, did not seem to help as much. At first glance this does not seem to make sense, and we guess that this could mostly be becuase of the poor quality of the data in some columns, especially columns relating to the state policies. However, this still reminds us that some envinronmental data could be unexpectedly important in the development of a pandemic, and policy makers should be aware of that. 
+Surprisingly, variables such as *total population*--instead of *population density*--and *lattitude/longitude* appear statistically significant as predictors in the models predicting *transmission rate* of the virus, while variables that seems intuitively important, such as *population density*, *medical resource* and *policy information*, did not seem to help as much. At first glance this does not seem to make sense, and we guess that this could mostly be becuase of the poor quality of the data in some columns, especially columns relating to the state policies. However, this still reminds us that some envinronmental data could be unexpectedly important in the development of a pandemic, and policy makers should be aware of that. 
 
 
 ### Challenges we ran into 
@@ -213,6 +213,6 @@ Both partners of our team are undergraduates in non-CS majors, and this is our f
 
 ### What's next for Covid-19 Policy Decision Helper
 
-As mentioned in the beginning, the ultimate goal of this project is to solve for a set, or a range, of best state-policy-related parameters conditioned by the social/environmental factors of a state. It remains for us to expand the dataset, especially to obtain more data describing the state policies, and eventually develop a formal mathemetical model that outputs specific guidelines 
+As mentioned in the beginning, the ultimate goal of this project is to solve for a set, or a range, of best state-policy-related parameters conditioned by the social/environmental factors of a state. It remains for us to expand the dataset, especially to obtain more data describing the state policies, and eventually develop a formal mathemetical model that outputs indicators as decision guidelines.
 
 
