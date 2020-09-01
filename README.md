@@ -187,7 +187,7 @@ Also, in part 3, we should have been able to at least get some clue of the signi
 
 ### Accomplishments that we're proud of 
 
-- We modified the classical SEIR model to fit the COVID-19 pandemic by considering the people in "quarantine" and making use of the hospitalized data. To our suprise, simple as our model seems, it fits the real data pretty well. Also, we found that by controling the transmission parameters, even if with a small change, the outcome may be completely different, which reveals the importance of policymaking.
+- We modified the classical SEIR model to fit the COVID-19 pandemic by considering the people in "quarantine" and making use of the hospitalized data. To our suprise, simple as our model seems, it fits the real data pretty well. 
 - Some models we obtained in part 3, though simple, are performing quite well regarding the model diagonostics and prediction making metrics, implying that those are models 
 - We did find out some really interesting relationships between the development of a pandemic and the social/environmental conditions of a state. Simple models tell a big story. The models that engage geographic and demographic predictors as significant factors should raise our awareness of the importance of geographic and demographic factors in decision making. 
 
@@ -197,7 +197,11 @@ Also, in part 3, we should have been able to at least get some clue of the signi
 
 Both partners of our team are undergraduates in non-CS majors, and this is our first time touching AWS or any other cloud service system. It did take us a while to figure out where to incorporate all those into AWS, but soon we saw the great potentials and capability of AWS. 
 
-2.  Different models and theories of the relationships are possible.  
+2.  A slight change in early-stage transmission rate could lead to a completely different ending.  
+
+In our simulations controling for the transmission parameters, we found that a tiny change in the the transmission parameters could lead to a radically different track of pandemic development in the end.  This reveals the importance of early-stage policy making to control the transmission rate, even if the change in transmission rate seems negligible.
+
+3. Different models and theories of the relationships are possible.  
 
 As we should know, in multiple-variable modeling, there is not necessarily one, singular correct answer/model, although certainly some methods and models are more useful and would perform better than others depending on the data we choose. The same applies to this project. In part 3, we collected a variety of models corresponding to each SEIR parameter, which performs similarly but are sometimes different in a radical way. For example, we have come across two models that reaches approximately the same error level when predicting a SEIR model parameter, one engages the policy-related variable as significant, while the other engages more demographic factors as significant but excludes any policy-related factors at all. Apparently, the two models tell different stories: the former implies that how early we impose an interving policy does affects the way that the pandemic develops, while the latter says actually more of the factors are predicted by the already-set geographic and demographic variables. 
 
