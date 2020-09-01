@@ -195,7 +195,7 @@ Also, in part 3, we should have been able to at least get some clue of the signi
 
 1. **The crucial role that cloud computing plays in data analysis.**
 
-Both partners of our team are undergraduates in non-CS majors, and this is our first time touching AWS or any other cloud service system. It did take us a while to figure out where to incorporate all those into AWS, but soon we saw the great potentials and capability of AWS. 
+Both partners of our team are undergraduates in non-CS majors, and this is our first time touching AWS or any other cloud service system. It did take us a while to figure out where to incorporate our tasks into AWS, but soon we saw the great potentials and capability of AWS. 
 
 2.  **A slight change in early-stage transmission rate could lead to a completely different ending.**
 
