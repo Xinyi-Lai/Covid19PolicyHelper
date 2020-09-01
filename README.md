@@ -29,12 +29,31 @@ Yulin Li, Xinyi Lai
 > Be sure to write what inspired you, what you learned, how you built, and challenges you faced.
 
 ### Inspiration
-As the COVID-19 pandemic spreads out all over the world, we see different strategies adopted by different countries and states, and (maybe therefore), we see different characteristics and trends in the transmission of virus in different regions.  We think that it will be interesting to model the dynamics of the viral transmission using a differential equation model, and by controlling the transmission parameters, we can also model the future trend of the pandemic under different circumstances. What's more interesting, we believe that there exists some relationship between the transmission parameters and the environmental factors such as the control policy, hospital beds, mobility, population and so on.... 
+
+As the COVID-19 pandemic spreads out all over the world, we see different strategies adopted by different countries and states, and (maybe therefore), we see different characteristics and trends in the transmission of virus in different regions. There are lots of concerns about the pandemic, and there are lots of debates about the policy making in many countries and regions.
+
+We think that it will be interesting to model the dynamics of the viral transmission using SEIR model, and by controlling the transmission parameters, we can model the future trend of the pandemic under different circumstances. Setting the future mortality rate as the objective function, we can find the best combination of parameters using optimization methods. 
+
+What's more interesting, we believe that there exists some relationship between the transmission parameters and the environmental factors such as the control policy, hospital beds, mobility, population and so on. Once their relationship is modeled, the effects of them on the transmission process can be explained quantitively. As a result, ideally, the optimal parameters obtained above will help us determine the best control policy with least cost, that is, the most relaxed policy acceptable.
+
 
 ### What it does
-Predict
+
+1. Viral transmission model. 
+    Based on the state-level data, we built a dynamic model for the viral transmission using differential equations. The transmission parameters are determined 
+2. Backward obtimization for finding the best set of parameters.
+3. 
+
 
 ### How we built it
+
+#### Part I: SEIR model
+We first build a dynamic model for the viral transmission. We correct
+
+#### Part II: backward optimization
+
+#### Part III: environmental factors modeling
+
 
 ### Challenges we ran into
 
