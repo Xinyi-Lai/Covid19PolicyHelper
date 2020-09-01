@@ -62,7 +62,7 @@ After preprocessing, we fetched the state-level timeseries data of cases, deaths
 #### Part 1: SEIR infection model
 
 We built a viral transmission model based on the classical SEIR model with some modifications. 
-![title](model.png)
+![title](https://github.com/Xinyi-Lai/Covid19PolicyHelper/blob/master/model.png)
 
 We Assume...
 
@@ -76,6 +76,8 @@ We Assume...
 
 
 Therefore, we have a set of differential equations to describe this process:
+
+![](http://latex.codecogs.com/gif.latex?\\frac{1}{1+sin(x)})
 
 $\begin{aligned}
 &\frac{dS}{dt}&
