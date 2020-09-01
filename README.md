@@ -177,7 +177,7 @@ The **modeling methods** we applied include the following:
 - Variable selection
 - Test/train splitting
 
-The resulting models are listed in the part-3 html page. 
+The resulting models are listed in the "**Result**" section on the part-3 html page. 
 
 ### Challenges we ran into 
 
