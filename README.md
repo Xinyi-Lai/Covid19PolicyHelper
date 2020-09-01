@@ -40,9 +40,11 @@ What's more interesting, we believe that there exists some relationship between 
 ### What it does
 
 1. Viral transmission model. 
-    Based on the state-level data, we built a dynamic model for the viral transmission using differential equations. The transmission parameters are determined 
-2. Backward obtimization for finding the best set of parameters.
-3. 
+    We built a dynamic model for the viral transmission using differential equations. The state-level timeseries data is used in the fitting of the model. After choosing a state of interest and a time period, the transmission parameters will be optimized and outputted, and a predicted curve will show the trend of the pandemic assuming all conditions stay the same in future.  
+2. Finding the best set of parameters.
+    With a tolerate threshold of mortality rate / infected rate in a given future period set, our algorithm can find the best set of parameters using the optimization methods. That is, the most relaxed conditions while keeping the mortality rate / infected rate under control for a given time period. In real policy making,  dynamic optimization can be of great help since it can continuously correct the model and give the optimal parameters based on the real-time data.
+3. Recommend the best policy decisions.
+    We modeled the relationship between the transmission parameters and the environmental factors. Given the optimal parameters obtianed above, we can determine the corresponding optimal policy and the value of environmental factors.
 
 
 ### How we built it
