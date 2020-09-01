@@ -55,9 +55,8 @@ We think that it will be interesting to model the dynamics of viral transmission
     We built a dynamic model for viral transmission using differential equations. The state-level time-series data is used in the fitting of the model. After choosing a state of interest and a time period, the transmission parameters will be optimized and outputted, and a predicted curve will show the trend of the pandemic assuming all conditions stay the same in the future.  
 2. **Finding the best set of parameters.**
     With a tolerant threshold of mortality rate / infected rate in a given future period set, our algorithm can find the best set of parameters using the optimization methods. That is, the most relaxed conditions while keeping the mortality rate / infected rate under control for a given time period. In real policymaking,  dynamic optimization can be of great help since it can continuously correct the model and give the optimal parameters based on the real-time data.
-3. **Recommend the best policy decisions.**
-    We modeled the relationship between the transmission parameters and the environmental factors. Given the optimal parameters obtained above, we can determine the corresponding optimal policy and the value of environmental factors.
-
+3. **Modeling the relationship between the transmission parameters and environmental factors.** 
+    We aim at obtaining models that are interpretive as well as predictive; in order words, we are hoping to find models that are simple, accessible and easy to be understood, so that people can gain some insights of what is significant to the way a pandemic develops; but at the same time, we are also searching for models among those explainable models that are most helpful for prediction of transmission parameters. 
 
 
 ### How we built it
@@ -213,6 +212,7 @@ Both partners of our team are undergraduates in non-CS majors, and this is our f
 
 ### What's next for Covid-19 Policy Decision Helper
 
-As mentioned in the beginning, the ultimate goal of this project is to solve for a set, or a range, of best state-policy-related parameters conditioned by the social/environmental factors of a state. It remains for us to expand the dataset, especially to obtain more data describing the state policies, and eventually develop a formal mathemetical model that outputs indicators as decision guidelines.
+As mentioned in the beginning, the ultimate goal of this project is to solve for a set, or a range, of best state-policy-related parameters conditioned by the social/environmental factors of a state. In other words, the mission is to **recommend the best policy decisions**.  
+We have modeled the relationship between the transmission parameters and the environmental factors. Given the optimal parameters obtained from part 2, we should at last be able to determine the corresponding optimal policy and the value of environmental factors. It remains for us to expand the dataset, especially to obtain more data describing the state policies, and eventually develop a formal mathemetical model that outputs indicators as decision guidelines.
 
 
