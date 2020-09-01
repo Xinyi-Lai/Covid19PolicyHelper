@@ -126,7 +126,7 @@ The variables engaged in the study are the following:
     - `k`: the proportion of positive cases that are not hospitalized
     - `sigma`: we choose `sigma` = 1/14 because the incubation period is 14 days on average.
     - `lamda`: infection rate of E (exposed)
-    - `c`: a coefficient measuring the effectiveness of self-quarantine, `c*lamda` is the infection rate of Q (self-quarantine),
+    - `c`: a coefficient measuring the effectiveness of self-quarantine, `c*lamda` is the infection rate of Q (self-quarantine)
     - `alpha`: immunity lost rate
     - `omega`: death rate
     - `miu`: recover rate
@@ -193,19 +193,19 @@ Also, in part 3, we should have been able to at least get some clue of the signi
 
 ### What we learned 
 
-1. The crucial role that cloud computing plays in data analysis.
+1. **The crucial role that cloud computing plays in data analysis.**
 
 Both partners of our team are undergraduates in non-CS majors, and this is our first time touching AWS or any other cloud service system. It did take us a while to figure out where to incorporate all those into AWS, but soon we saw the great potentials and capability of AWS. 
 
-2.  A slight change in early-stage transmission rate could lead to a completely different ending.  
+2.  **A slight change in early-stage transmission rate could lead to a completely different ending.**
 
 In our simulations controling for the transmission parameters, we found that a tiny change in the the transmission parameters could lead to a radically different track of pandemic development in the end.  This reveals the importance of early-stage policy making to control the transmission rate, even if the change in transmission rate seems negligible.
 
-3. Different models and theories of the relationships are possible.  
+3. **Different models and theories of the relationships are possible.**
 
 As we should know, in multiple-variable modeling, there is not necessarily one, singular correct answer/model, although certainly some methods and models are more useful and would perform better than others depending on the data we choose. The same applies to this project. In part 3, we collected a variety of models corresponding to each SEIR parameter, which performs similarly but are sometimes different in a radical way. For example, we have come across two models that reaches approximately the same error level when predicting a SEIR model parameter, one engages the policy-related variable as significant, while the other engages more demographic factors as significant but excludes any policy-related factors at all. Apparently, the two models tell different stories: the former implies that how early we impose an interving policy does affects the way that the pandemic develops, while the latter says actually more of the factors are predicted by the already-set geographic and demographic variables. 
 
-3. Geographic and demographic predictors are more useful and more important than we used to think. 
+3. **Geographic and demographic predictors are more useful and more important than we used to think.**
 
 Surprisingly, variables such as *total population*--instead of *population density*--and *lattitude/longitude* appear statistically significant as predictors in the models predicting *transmission rate* of the virus, while variables that seems intuitively important, such as *population density*, *medical resource* and *policy information*, did not seem to help as much. At first glance this does not seem to make sense, and we guess that this could mostly be becuase of the poor quality of the data in some columns, especially columns relating to the state policies. However, this still reminds us that some envinronmental data could be unexpectedly important in the development of a pandemic, and policy makers should be aware of that. 
 
