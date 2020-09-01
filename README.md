@@ -104,12 +104,20 @@ E(t) = I(t+14) - I(t),~ S = N - E - I - R - X,\\
 k = 1 - avg(\frac{\Delta hospitalized}{\Delta test\_pos})
 $
 
-Running the model for each state for every 15-day period with appropriate data, we got the best parameters fitting the models.
+Running the model for each state for every 15-day period with appropriate data, we got the best parameters fitting the models for each state and time period.
+
 
 #### Part II: backward optimization
 
+Considering the physical meaning of all the parameters in the above SEIR model, an important limit to the control of the pandemic is medical resources. In other words, $k, \mu, \omega$ depends on the temporal situations of each states or countries. Another limit is the inherent feature of the COVID-19 virus itself, i.e. $\sigma$ and $\alpha$. 
+However, the policy maker can decide on the control policy, which directly affects $\lambda$ and $c\lambda$. We know that the control policy is like a double-edged sword: if it is too strict, it would have a bad impact on the economy and people's social life; but if it is too relaxed, the pandemic will soon lose control, causing even more severe consequences.
 
+Therefore, our solution is trying to find the best set of transmission parameters $\lambda$ and $c$ using optimization methods.
+1. Given a state of interest and a start date, the algorithm will fetch for the pandemic  data of that region at that time. It will then take the original parameters as the first guess, and simulate the trend assuming all conditions stay the same in future.
+2. With the control term (death / case) and the control factor (proportion of population) specified, the optimization algorithm will run to find the best set of parameters needed to satisfy the requirement. And by controlling the transmission parameters, the trend can also be visualized.
+3. Ideally, this algorithm can be run dynamically using the real time data, so that the policy can be adjusted timely and effectively.
 
+By controling the transmission parameters, we can see some completely different curves, which means that making a wise policy decision may significantly affect the future of people.
 
 
 #### Part III: environmental factors modeling
