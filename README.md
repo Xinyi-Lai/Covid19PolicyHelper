@@ -123,13 +123,13 @@ With such goals in mind, we engaged a relatively small number of variables in ou
 The variables engaged in the study are the following: 
 
 - SEIR model parameters: 
-    - `k`
-    - `sigma`
-    - `lamda`
-    - `c`
-    - `alpha`
-    - `omega`
-    - `miu`
+    - `k`: the proportion of positive cases that are not hospitalized
+    - `sigma`: we choose `sigma` = 1/14 because the incubation period is 14 days on average.
+    - `lamda`: infection rate of E (exposed)
+    - `c`: a coefficient measuring the effectiveness of self-quarantine, `c*lamda` is the infection rate of Q (self-quarantine),
+    - `alpha`: immunity lost rate
+    - `omega`: death rate
+    - `miu`: recover rate
     
 - Geographic factors (state-level data, obtained by taking averages of county-level data): 
     - `POP_LATITUDE`: latitute of population center
