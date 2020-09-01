@@ -176,30 +176,38 @@ The **modeling methods** we applied include the following:
 
 - Data cleaning as necessary to address observations with missing or extreme values.
 - Multiple linear regression
-- ANOVA (codes omitted)
-- Interaction (codes omitted)
+- ANOVA 
+- Interaction 
 - Residual diagnostics
 - Transformations
 - Polynomial regression
-- Stepwise model selection (AIC & BIC) (codes omitted)
-- Variable selection (codes omitted)
+- Stepwise model selection (AIC & BIC)
+- Variable selection
 - Test/train splitting
 
+The resulting models are listed in the part-3 html page. 
 
-As we should know, in multiple-variable modeling, there is not necessarily one, singular correct answer/model, although certainly some methods and models are more useful and would perform better than others depending on the data we choose. The same happens to this project. In this part, we collected a variety of models corresponding to each SEIR parameter, which performs similarly but are sometimes different in a radical way. 
+**What we found out:** 
 
-For example, there were two models that reaches approximately the same error level when predicting the response variable `k`. However, 
+1.  Different models and theories of the relationships are possible.  
+
+As we should know, in multiple-variable modeling, there is not necessarily one, singular correct answer/model, although certainly some methods and models are more useful and would perform better than others depending on the data we choose. The same applies to this project. In this part, we collected a variety of models corresponding to each SEIR parameter, which performs similarly but are sometimes different in a radical way. For example, we have come across two models that reaches approximately the same error level when predicting a SEIR model parameter, one engages the policy-related variable as significant, while the other engages more demographic factors as significant but excludes any policy-related factors at all. Apparently, the two models tell different stories: the former implies that how early we impose an interving policy does affects the way that the pandemic develops, while the latter says actually more of the factors are predicted by the already-set geographic and demographic variables. 
+
+2. Geographic and demographic predictors are more useful and more important than we used to think. 
+
+Surprisingly, variables such as total population--instead of population density--and lattitude/longitude appear statistically significant as predictors in the models predicting transmission rate of the virus, while variables that seems intuitively important, such as population density, medical resource and policy information, did not seem to help as much. At first glance this does not seem to make sense, and we guess that this could mostly be becuase of the poor quality of the data in some columns, especially columns relating to the state policies. However, this still reminds us that some envinronmental data could be unexpectedly important in the development of a pandemic, and policy makers should be aware of that. 
 
 
 ### Challenges we ran into 
 
-In part 3, we should be able to get some clue of the relationship between the state policies and the other variables. However, the 
+Searching for meaningful and usable datasets as well as extracting and cleaning information of interests had been a greater pain for us than we had thought. 
+
+Also, in part 3, we should have been able to at least get some clue of the significance of the state policies as pandemic predictors. However, due to the paucity of data quality, linear dependence occurs in the data columns involving Covid-19 policies, so that the relationship we questioned remains unable to be calculated for now. 
 
 ### Accomplishments that we're proud of 
 
-1. We did find out some really interesting relationships between the development of a pandemic and the social/environmental conditions of a state. Simple models tell a big story. 
-
-Usually, we would not be explicitly considering the geographic
+- Some models we obtained in part 3, though simple, are performing quite well regarding the model diagonostics and prediction making metrics, implying that those are models 
+- We did find out some really interesting relationships between the development of a pandemic and the social/environmental conditions of a state. Simple models tell a big story. The models that engage geographic and demographic predictors as significant factors should raise our awareness of the importance of geographic and demographic factors in decision making. 
 
 ### What we learned 
 
@@ -207,6 +215,6 @@ Both partners of our team are undergraduates in non-CS majors, and this is our f
 
 ### What's next for Covid-19 Policy Decision Helper
 
-As mentioned in the beginning, the final goal of this project is to solve for a set, or a range, of best policy parameters conditioned by the social/environmental factors of a state. 
+As mentioned in the beginning, the ultimate goal of this project is to solve for a set, or a range, of best state-policy-related parameters conditioned by the social/environmental factors of a state. It remains for us to expand the dataset, especially to obtain more data describing the state policies, and eventually develop a formal mathemetical model that outputs specific guidelines 
 
 
