@@ -1,0 +1,900 @@
+---
+title: "Covid-19 Policy Helper"
+date: Aug 2020
+author: "Xinyi Lai, Yulin Li"
+output: 
+  html_document: 
+    theme: readable
+    toc: yes
+    toc_depth: 4
+    number_sections: no
+urlcolor: cyan
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 80)
+library(knitr)
+opts_chunk$set(cache = TRUE, autodep = TRUE)
+```
+
+## Introduction
+
+This is `part 3` of the project "Covid-19 Policy Decision Helper". In this part, we try to model the relationship between the SEIR model parameters and a variety of social factors, including demographic, medical and policy factors. We aim at obtaining models that are interpretive as well as predictive; in order words, we are hoping to find models that are simple, accessible and easy to be interpreted and understood, so that people can gain some insights of what is significant to the way a pandemic develops, but at the same time, we are also striving to find models that are most helpful making predictions among those explainable models. 
+
+With such goals in mind, we engaged a relatively small number of variables in our study--variables that seem significant to us intuitively, from the most accessible open data source. 
+
+The **modeling methods** we applied include the following: 
+
+- Data cleaning as necessary to address observations with missing or extreme values.
+- Multiple linear regression
+- ANOVA (codes omitted)
+- Interaction (codes omitted)
+- Residual diagnostics
+- Transformations
+- Polynomial regression
+- Stepwise model selection (AIC & BIC) (codes omitted)
+- Variable selection (codes omitted)
+- Test/train splitting
+
+**Data source**: 
+
+- Demographic, medical and policy data: [COVID-19 Prediction Models Counties & Hospitals | Yu Group (UC Berkeley)](https://aws.amazon.com/marketplace/pp/prodview-px2tvvydirx4o?qid=1587582026402&sr=0-1&ref_=srh_res_product_title#overview)
+- Infection data and SEIR model estimated parameters: project `part 1` and `part 2`.
+
+```{r echo=FALSE, message=FALSE}
+library(lmtest)
+
+get_bp_decision = function(model, alpha) {
+  decide = unname(bptest(model)$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_bp_pval = function(model) {
+  bptest(model)$p.value
+}
+
+get_sw_decision = function(model, alpha) {
+  decide = unname(shapiro.test(resid(model))$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_sw_pval = function(model) {
+  shapiro.test(resid(model))$p.value
+}
+
+get_num_params = function(model) {
+  length(coef(model))
+}
+
+get_loocv_rmse = function(model, is_log, k) {
+  ifelse(
+    is_log, 
+    sqrt(mean(na.omit(((data_trn[, k] - exp(fitted(model))) / (1 - hatvalues(model))) ^ 2))),
+    sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+  )
+}
+
+get_adj_r2 = function(model) {
+  summary(model)$adj.r.squared
+}
+
+test_mod = function(model, is_log = FALSE, k = 1){
+  c(loocv_rmse = get_loocv_rmse(model, is_log, k), 
+    adj_r2 = get_adj_r2(model), 
+    bp_pval = get_bp_pval(model), 
+    sw_pval = get_sw_pval(model), 
+    num_params = get_num_params(model), 
+    test_rmse = get_test_rmse(model, k), 
+    perc_err = get_perc_err(model, k))
+}
+
+diagnostics = function(model, pcol = "grey", lcol = "dodgerblue", alpha = 0.05, plotit = TRUE, testit = TRUE){
+  if (plotit){
+    par(mfrow = c(1, 2), pty="s")
+    
+    plot(fitted(model), resid(model), col = "grey", pch = 20, 
+         xlab = "Fitted", ylab = "Residual", 
+         main = "Fitted versus Residuals")
+    abline(h = 0, col = "darkorange", lwd = 2)
+    
+    qqnorm(resid(model), col = pcol)
+    qqline(resid(model), col = lcol, lwd = 2)
+  }
+  if (testit){
+    list(p_val = shapiro.test(resid(model))$p, 
+         decision = ifelse(test = shapiro.test(resid(model))$p < alpha, 
+                           yes = "Reject", no = "Fail to Reject"))
+  }
+}
+
+get_test_rmse = function(model, k) {
+  sqrt(mean((data_tst[, k] - predict(model, newdata = data_tst))^ 2))
+}
+
+get_perc_err = function(model, k) {
+  actual = data_tst[, k]
+  predicted = predict(model, newdata = data_tst)
+  100 * mean((abs(actual - predicted)) / actual)
+}
+```
+
+## Data Preprocessing
+
+```{r}
+StateOfInterest = c("Arizona", "California", "Minnesota", "New Mexico", "New York", 
+                   "Oklahoma", "South Carolina", "Tennessee", "Utah", "Virginia", 
+                   "West Virginia", "Wisconsin")
+```
+
+
+### Demographic & Policy Data (County-Level)
+```{r message=FALSE}
+library(readr)
+county_data_abridged = read_csv("county_data_abridged.csv")
+```
+
+```{r}
+dim(county_data_abridged)
+names(county_data_abridged)
+```
+
+
+
+```{r}
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "#EligibleforMedicare2018"] = "EligibleforMedicare2018"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "#FTEHospitalTotal2017"] = "FTEHospitalTotal2017"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "#HospParticipatinginNetwork2017"] = "HospParticipatinginNetwork2017"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "#Hospitals"] = "Hospitals"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "#ICU_beds"] = "ICU_beds"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "PopulationEstimate65+2017"] = "PopulationEstimate_above65_2017"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "stay at home"] = "stay_at_home"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == ">50 gatherings"] = "above_50_gatherings"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == ">500 gatherings"] = "above_500_gatherings"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "public schools"] = "public_schools"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "restaurant dine-in"] = "restaurant_dine_in"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "entertainment/gym"] = "entertainment_gym"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "federal guidelines"] = "federal_guidelines"
+colnames(county_data_abridged)[colnames(county_data_abridged) 
+                               == "foreign travel ban"] = "foreign_travel_ban"
+```
+
+
+```{r}
+data = subset(county_data_abridged,
+              select = c(State, CountyName, POP_LATITUDE, POP_LONGITUDE,
+                         PopulationEstimate2018, PopTotalMale2017, 
+                         PopulationEstimate_above65_2017, PopulationDensityperSqMile2010, 
+                         DiabetesPercentage, Smokers_Percentage, 
+                         HeartDiseaseMortality, StrokeMortality, 
+                         Hospitals, ICU_beds, HospParticipatinginNetwork2017, 
+                         stay_at_home, above_50_gatherings, above_500_gatherings, 
+                         restaurant_dine_in, entertainment_gym))
+data = na.omit(data)
+data = droplevels(data)
+
+data$stay_at_home = data$stay_at_home - range(data$stay_at_home)[1]
+data$above_50_gatherings = data$above_50_gatherings - range(data$above_50_gatherings)[1]
+data$above_500_gatherings = data$above_500_gatherings - range(data$above_500_gatherings)[1]
+data$restaurant_dine_in = data$restaurant_dine_in - range(data$restaurant_dine_in)[1]
+data$entertainment_gym = data$entertainment_gym - range(data$entertainment_gym)[1]
+
+str(data)
+```
+
+```{r}
+data_demographic_county = data
+```
+
+
+### Infection Data (State-Level)
+
+#### Covid-19 Cases
+```{r message=FALSE, warning=FALSE}
+timeseries = read_csv("../datasets/timeseries.csv")
+```
+
+```{r}
+data = timeseries
+data = subset(data, country == "United States" & level == "state")
+data = subset(data, !(name %in% c("Unassigned cases, Arkansas, US", 
+              "Unassigned cases, Georgia, US", "Unassigned cases, Illinois, US",
+              "Unassigned cases, Iowa, US", "Unassigned cases, Maine, US",
+              "Unassigned cases, Massachusetts, US", "Unassigned cases, North Dakota, US",
+              "Washington, D.C., US")))
+data$state = matrix(unlist(strsplit(as.character(data$name), ", ")), ncol = 2, byrow = TRUE)[, 1]
+data = subset(data,
+              select = c(state, date, cases, deaths, recovered))
+
+data = subset(data, state %in% StateOfInterest)
+
+data$state =     as.factor(data$state)
+data$cases =     as.numeric(data$cases)
+data$deaths =    as.numeric(data$deaths)
+data$recovered = as.numeric(data$recovered)
+
+data = na.omit(data)
+data = droplevels(data)
+
+str(data)
+```
+
+```{r}
+range(data$cases)
+range(data$deaths)
+range(data$recovered)
+```
+
+```{r}
+data_cases_state = data
+```
+
+#### SEIR Model Parameters
+```{r message=FALSE, warning=FALSE}
+model_out = read_csv("../datasets/model_out.csv")
+```
+
+```{r}
+str(model_out)
+```
+
+```{r}
+data_parm = model_out
+```
+
+### Combined Data of Intersts (State-Level)
+
+```{r}
+data = data_parm
+
+n = length(data$state)
+data$cases = rep(0, n)
+data$deaths = rep(0, n)
+data$recovered = rep(0, n)
+
+for (i in 1:n){
+  j = data_cases_state$state == data$state[i] & data_cases_state$date == data$startdate[i]
+  if (sum(j) == 0){
+    data[i, ] = NA
+  }else{
+    data[i, c("cases", "deaths", "recovered")] = data_cases_state[j, c("cases", "deaths", "recovered")]
+  }
+}
+
+data = na.omit(data)
+
+data_demographic_state = as.data.frame(matrix(nrow = length(data$state), ncol = length(colnames(data_demographic_county)) - 1))
+colnames(data_demographic_state) = colnames(data_demographic_county)[colnames(data_demographic_county) != "CountyName"]
+data_demographic_state$State = data$state
+
+for (s in data_demographic_state$State){
+  for (k in 2:ncol(data_demographic_state)){
+    data_demographic_state[data_demographic_state$State == s, k] = 
+      mean(unlist(data_demographic_county[data_demographic_county$State == s, k+1]))
+  }
+}
+
+data = cbind(data, 
+             subset(data_demographic_state[, colnames(data_demographic_state)[colnames(data_demographic_state) != "State"]]))
+data = na.omit(data)
+```
+
+```{r}
+data$days = rep(0, nrow(data))
+data$temp = rep(0, nrow(data))
+for (i in 1:nrow(data)){
+  data$temp = diff.Date(c(data[i, ]$startdate, data[i, ]$enddate))
+}
+for (s in data$state){
+  for (d in 1:nrow(subset(data, state == s))){
+    data[data$state == s, "days"][d] = sum(subset(data, state == s)[1:d, "temp"])
+  }
+}
+data = data[, colnames(data)[colnames(data) != "temp"]]
+data_unamed = data[, colnames(data)[!(colnames(data) %in% c("state", "startdate", "enddate"))]]
+```
+
+
+```{r}
+# head(data_demographic_county, 10)
+# head(data_demographic_state, 10)
+# head(data[, c("state", "startdate", "enddate", "days")], 10)
+head(data, 10)
+```
+
+
+
+## Methods: Modeling & Testing Procedures (abridged)
+
+### Data Points `pairs()` Plot
+
+<style>
+  .superbigimage{
+      overflow-x:scroll;
+      white-space: nowrap;
+  }
+
+  .superbigimage img{
+     max-width: none;
+  }
+  
+  
+</style>
+
+<div class="superbigimage">
+```{r, echo=FALSE, fig.width=30, fig.height=20}
+pairs(data_unamed, col = "dodgerblue")
+```
+</div>
+
+```{r eval=FALSE, include=FALSE}
+colnames(data_unamed)
+```
+
+```{r}
+set.seed(42)
+num_obs = nrow(data_unamed) # total number of observations
+num_trn = round(num_obs * 0.90) # number of observations for the training data
+
+trn_idx = sample(num_obs, num_trn) # randomly generate the index for the training data
+data_trn = data_unamed[trn_idx, ] # training data
+data_tst = data_unamed[-trn_idx, ] # testing data
+```
+
+### Modeling `k`
+```{r}
+# full additive model
+mod_k_full = lm(k ~ ., data = data_trn)
+test_mod(mod_k_full, k = 1)
+summary(mod_k_full)
+```
+
+
+```{r}
+# small additive model
+mod_k_1 = lm(k ~ days, data = data_trn)
+# large additive model
+mod_k_2 = lm(k ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma, data = data_trn)
+
+test_mod(mod_k_1, k = 1)
+test_mod(mod_k_2, k = 1)
+summary(mod_k_1)
+summary(mod_k_2)
+```
+```{r}
+# intermediate model
+mod_k_3 = lm(k ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 
+             + log(days) - days
+             + stay_at_home - PopulationEstimate2018 - PopTotalMale2017
+             + I(POP_LATITUDE ^ 2) +  + I(POP_LONGITUDE ^ 2), 
+             data = data_trn)
+mod_k_4 = lm(k ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 + 
+               log(days) - days, 
+             data = data_trn)
+
+test_mod(mod_k_1, k = 1)
+test_mod(mod_k_2, k = 1)
+test_mod(mod_k_3, k = 1)
+test_mod(mod_k_4, k = 1)
+summary(mod_k_3)
+summary(mod_k_4)
+```
+
+```{r}
+# intermediate model 
+# relatively bad models
+mod_k_5 = lm(k ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - (lamda + c + alpha + omega + miu), 
+             data = data_trn)
+mod_k_6 = lm(k ~ lamda + c + alpha + omega + miu, 
+             data = data_trn)
+
+test_mod(mod_k_1, k = 1)
+test_mod(mod_k_2, k = 1)
+test_mod(mod_k_3, k = 1)
+test_mod(mod_k_4, k = 1)
+test_mod(mod_k_5, k = 1)
+test_mod(mod_k_6, k = 1)
+summary(mod_k_5)
+summary(mod_k_6)
+```
+
+```{r}
+mod_k = mod_k_6
+# diagnostics(mod_k, testit = FALSE)
+```
+
+### Modeling `sigma`
+
+In this case, `sigma` is set to an empirical value. Modeling excluded.
+
+### Modeling `lamda`
+
+```{r}
+# full additive model
+mod_lamda_full = lm(lamda ~ ., data = data_trn)
+test_mod(mod_lamda_full, k = 3)
+summary(mod_lamda_full)
+```
+
+
+```{r}
+# small additive model
+mod_lamda_1 = lm(lamda ~ days, data = data_trn)
+# large additive model
+mod_lamda_2 = lm(lamda ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma, data = data_trn)
+
+test_mod(mod_lamda_1, k = 3)
+test_mod(mod_lamda_2, k = 3)
+summary(mod_lamda_1)
+summary(mod_lamda_2)
+```
+
+```{r}
+# intermediate model
+mod_lamda_3 = lm(lamda ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 
+             + log(days) - days
+             + stay_at_home - PopulationEstimate2018 - PopTotalMale2017
+             + I(POP_LATITUDE ^ 2) +  + I(POP_LONGITUDE ^ 2), 
+             data = data_trn)
+mod_lamda_4 = lm(lamda ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 + 
+               log(days) - days, 
+             data = data_trn)
+
+test_mod(mod_lamda_1, k = 3)
+test_mod(mod_lamda_2, k = 3)
+test_mod(mod_lamda_3, k = 3)
+test_mod(mod_lamda_4, k = 3)
+summary(mod_lamda_3)
+summary(mod_lamda_4)
+```
+
+```{r}
+# intermediate model 
+# relatively bad models
+mod_lamda_5 = lm(lamda ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - (k + c + alpha + omega + miu), 
+             data = data_trn)
+mod_lamda_6 = lm(lamda ~  k + c + alpha + omega + miu, 
+             data = data_trn)
+
+test_mod(mod_lamda_1, k = 3)
+test_mod(mod_lamda_2, k = 3)
+test_mod(mod_lamda_3, k = 3)
+test_mod(mod_lamda_4, k = 3)
+test_mod(mod_lamda_5, k = 3)
+test_mod(mod_lamda_6, k = 3)
+summary(mod_lamda_5)
+summary(mod_lamda_6)
+```
+
+```{r}
+mod_lamda = mod_lamda_4
+# diagnostics(mod_lamda, testit = FALSE)
+```
+
+
+### Modeling `c`
+
+```{r}
+# full additive model
+mod_c_full = lm(c ~ ., data = data_trn)
+test_mod(mod_c_full, k = 4)
+summary(mod_c_full)
+```
+
+
+```{r}
+# small additive model
+mod_c_1 = lm(c ~ days, data = data_trn)
+# large additive model
+mod_c_2 = lm(c ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma, data = data_trn)
+
+test_mod(mod_c_1, k = 4)
+test_mod(mod_c_2, k = 4)
+summary(mod_c_1)
+summary(mod_c_2)
+```
+
+```{r}
+# intermediate model
+mod_c_3 = lm(c ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 
+             + log(days) - days
+             + stay_at_home - PopulationEstimate2018 - PopTotalMale2017
+             + I(POP_LATITUDE ^ 2) +  + I(POP_LONGITUDE ^ 2), 
+             data = data_trn)
+mod_c_4 = lm(c ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 + 
+               log(days) - days, 
+             data = data_trn)
+
+test_mod(mod_c_1, k = 4)
+test_mod(mod_c_2, k = 4)
+test_mod(mod_c_3, k = 4)
+test_mod(mod_c_4, k = 4)
+summary(mod_c_3)
+summary(mod_c_4)
+```
+
+```{r}
+# intermediate model 
+# relatively bad models
+mod_c_5 = lm(c ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - (k + lamda + alpha + omega + miu), 
+             data = data_trn)
+mod_c_6 = lm(c ~  k + lamda + alpha + omega + miu, 
+             data = data_trn)
+
+test_mod(mod_c_1, k = 4)
+test_mod(mod_c_2, k = 4)
+test_mod(mod_c_3, k = 4)
+test_mod(mod_c_4, k = 4)
+test_mod(mod_c_5, k = 4)
+test_mod(mod_c_6, k = 4)
+summary(mod_c_5)
+summary(mod_c_6)
+```
+
+```{r}
+mod_c = mod_c_3
+# diagnostics(mod_c, testit = FALSE)
+```
+
+### Modeling `alpha`
+
+```{r}
+# full additive model
+mod_alpha_full = lm(alpha ~ ., data = data_trn)
+test_mod(mod_alpha_full, k = 5)
+summary(mod_alpha_full)
+```
+
+
+```{r}
+# small additive model
+mod_alpha_1 = lm(alpha ~ days, data = data_trn)
+# large additive model
+mod_alpha_2 = lm(alpha ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma, data = data_trn)
+
+test_mod(mod_alpha_1, k = 5)
+test_mod(mod_alpha_2, k = 5)
+summary(mod_alpha_1)
+summary(mod_alpha_2)
+```
+
+```{r}
+# intermediate model
+mod_alpha_3 = lm(alpha ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 
+             + log(days) - days
+             + stay_at_home - PopulationEstimate2018 - PopTotalMale2017
+             + I(POP_LATITUDE ^ 2) +  + I(POP_LONGITUDE ^ 2), 
+             data = data_trn)
+mod_alpha_4 = lm(alpha ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 + 
+               log(days) - days, 
+             data = data_trn)
+
+test_mod(mod_alpha_1, k = 5)
+test_mod(mod_alpha_2, k = 5)
+test_mod(mod_alpha_3, k = 5)
+test_mod(mod_alpha_4, k = 5)
+summary(mod_alpha_3)
+summary(mod_alpha_4)
+```
+
+```{r}
+# intermediate model 
+# relatively bad models
+mod_alpha_5 = lm(alpha ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - (k + lamda + c + omega + miu), 
+             data = data_trn)
+mod_alpha_6 = lm(alpha ~  k + lamda + c + omega + miu, 
+             data = data_trn)
+
+test_mod(mod_alpha_1, k = 5)
+test_mod(mod_alpha_2, k = 5)
+test_mod(mod_alpha_3, k = 5)
+test_mod(mod_alpha_4, k = 5)
+test_mod(mod_alpha_5, k = 5)
+test_mod(mod_alpha_6, k = 5)
+summary(mod_alpha_5)
+summary(mod_alpha_6)
+```
+
+```{r}
+mod_alpha = mod_alpha_4
+# diagnostics(mod_alpha, testit = FALSE)
+```
+
+### Modeling `omega`
+
+```{r}
+# full additive model
+mod_omega_full = lm(omega ~ ., data = data_trn)
+test_mod(mod_omega_full, k = 6)
+summary(mod_omega_full)
+```
+
+
+```{r}
+# small additive model
+mod_omega_1 = lm(omega ~ days, data = data_trn)
+# large additive model
+mod_omega_2 = lm(omega ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma, data = data_trn)
+
+test_mod(mod_omega_1, k = 6)
+test_mod(mod_omega_2, k = 6)
+summary(mod_omega_1)
+summary(mod_omega_2)
+```
+
+```{r}
+# intermediate model
+mod_omega_3 = lm(omega ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 
+             + log(days) - days
+             + stay_at_home - PopulationEstimate2018 - PopTotalMale2017
+             + I(POP_LATITUDE ^ 2) +  + I(POP_LONGITUDE ^ 2), 
+             data = data_trn)
+mod_omega_4 = lm(omega ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 + 
+               log(days) - days, 
+             data = data_trn)
+
+test_mod(mod_omega_1, k = 6)
+test_mod(mod_omega_2, k = 6)
+test_mod(mod_omega_3, k = 6)
+test_mod(mod_omega_4, k = 6)
+summary(mod_omega_3)
+summary(mod_omega_4)
+```
+
+```{r}
+# intermediate model 
+# relatively bad models
+mod_omega_5 = lm(omega ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - (k + lamda + c + alpha + miu), 
+             data = data_trn)
+mod_omega_6 = lm(omega ~  k + lamda + c + alpha + miu, 
+             data = data_trn)
+
+test_mod(mod_omega_1, k = 6)
+test_mod(mod_omega_2, k = 6)
+test_mod(mod_omega_3, k = 6)
+test_mod(mod_omega_4, k = 6)
+test_mod(mod_omega_5, k = 6)
+test_mod(mod_omega_6, k = 6)
+summary(mod_omega_5)
+summary(mod_omega_6)
+```
+
+```{r}
+mod_omega = mod_omega_4
+# diagnostics(mod_omega, testit = FALSE)
+```
+
+### Modeling `miu`
+
+```{r}
+# full additive model
+mod_miu_full = lm(miu ~ ., data = data_trn)
+test_mod(mod_miu_full, k = 7)
+summary(mod_miu_full)
+```
+
+
+```{r}
+# small additive model
+mod_miu_1 = lm(miu ~ days, data = data_trn)
+# large additive model
+mod_miu_2 = lm(miu ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma, data = data_trn)
+
+test_mod(mod_miu_1, k = 7)
+test_mod(mod_miu_2, k = 7)
+summary(mod_miu_1)
+summary(mod_miu_2)
+```
+
+```{r}
+# intermediate model
+mod_miu_3 = lm(miu ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 
+             + log(days) - days
+             + stay_at_home - PopulationEstimate2018 - PopTotalMale2017
+             + I(POP_LATITUDE ^ 2) +  + I(POP_LONGITUDE ^ 2), 
+             data = data_trn)
+mod_miu_4 = lm(miu ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - cases - deaths - omega - recovered - PopulationDensityperSqMile2010 + 
+               log(days) - days, 
+             data = data_trn)
+
+test_mod(mod_miu_1, k = 7)
+test_mod(mod_miu_2, k = 7)
+test_mod(mod_miu_3, k = 7)
+test_mod(mod_miu_4, k = 7)
+summary(mod_miu_3)
+summary(mod_miu_4)
+```
+
+```{r}
+# intermediate model 
+# relatively bad models
+mod_miu_5 = lm(miu ~ . - Hospitals - ICU_beds - HospParticipatinginNetwork2017 - stay_at_home - above_50_gatherings - above_500_gatherings - restaurant_dine_in - entertainment_gym - sigma
+             - (k + lamda + c + alpha + omega), 
+             data = data_trn)
+mod_miu_6 = lm(miu ~  k + lamda + c + alpha + omega, 
+             data = data_trn)
+
+test_mod(mod_miu_1, k = 7)
+test_mod(mod_miu_2, k = 7)
+test_mod(mod_miu_3, k = 7)
+test_mod(mod_miu_4, k = 7)
+test_mod(mod_miu_5, k = 7)
+test_mod(mod_miu_6, k = 7)
+summary(mod_miu_5)
+summary(mod_miu_6)
+```
+
+```{r}
+mod_miu = mod_miu_2
+# diagnostics(mod_miu, testit = FALSE)
+```
+
+## Result
+
+### Six Models & Summaries
+
+```{r}
+summary(mod_k)
+summary(mod_lamda)
+summary(mod_c)
+summary(mod_alpha)
+summary(mod_omega)
+summary(mod_miu)
+```
+
+### Model Diagonostics (Test Statistics)
+
+```{r}
+test_mod(mod_k, k = 1)
+test_mod(mod_lamda, k = 3)
+test_mod(mod_c, k = 4)
+test_mod(mod_alpha, k = 5)
+test_mod(mod_omega, k = 6)
+test_mod(mod_miu, k = 7)
+```
+
+### Model Diagonostics (Plots)
+
+```{r fig.cap="[Figure 1.1. Model `k`]", fig.align="center"}
+diagnostics(mod_k, testit = FALSE)
+```
+
+
+```{r fig.cap="[Figure 1.2. Model `lamda`]", fig.align="center"}
+diagnostics(mod_lamda, testit = FALSE)
+```
+
+
+```{r fig.cap="[Figure 1.3. Model `c`]", fig.align="center"}
+diagnostics(mod_c, testit = FALSE)
+```
+
+
+```{r fig.cap="[Figure 1.4. Model `alpha`]", fig.align="center"}
+diagnostics(mod_alpha, testit = FALSE)
+```
+
+
+```{r fig.cap="[Figure 1.5. Model `omega`]", fig.align="center"}
+diagnostics(mod_omega, testit = FALSE)
+```
+
+
+```{r fig.cap="[Figure 1.6. Model `miu`]", fig.align="center"}
+diagnostics(mod_miu, testit = FALSE)
+```
+
+
+## Discussion
+
+See project [Homepage](https://xinyi-lai.github.io). 
+
+## Appendix 
+
+### Helper Functions 
+
+```{r helper_functions, eval=FALSE}
+get_bp_decision = function(model, alpha) {
+  decide = unname(bptest(model)$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_bp_pval = function(model) {
+  bptest(model)$p.value
+}
+
+get_sw_decision = function(model, alpha) {
+  decide = unname(shapiro.test(resid(model))$p.value < alpha)
+  ifelse(decide, "Reject", "Fail to Reject")
+}
+
+get_sw_pval = function(model) {
+  shapiro.test(resid(model))$p.value
+}
+
+get_num_params = function(model) {
+  length(coef(model))
+}
+
+get_loocv_rmse = function(model, is_log, k) {
+  ifelse(
+    is_log, 
+    sqrt(mean(na.omit(((data_trn[, k] - exp(fitted(model))) / (1 - hatvalues(model))) ^ 2))),
+    sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+  )
+}
+
+get_adj_r2 = function(model) {
+  summary(model)$adj.r.squared
+}
+
+test_mod = function(model, is_log = FALSE, k = 1){
+  c(loocv_rmse = get_loocv_rmse(model, is_log, k), 
+    adj_r2 = get_adj_r2(model), 
+    bp_pval = get_bp_pval(model), 
+    sw_pval = get_sw_pval(model), 
+    num_params = get_num_params(model), 
+    test_rmse = get_test_rmse(model, k), 
+    perc_err = get_perc_err(model, k))
+}
+
+diagnostics = function(model, pcol = "grey", lcol = "dodgerblue", alpha = 0.05, plotit = TRUE, testit = TRUE){
+  if (plotit){
+    par(mfrow = c(1, 2), pty="s")
+    
+    plot(fitted(model), resid(model), col = "grey", pch = 20, 
+         xlab = "Fitted", ylab = "Residual", 
+         main = "Fitted versus Residuals")
+    abline(h = 0, col = "darkorange", lwd = 2)
+    
+    qqnorm(resid(model), col = pcol)
+    qqline(resid(model), col = lcol, lwd = 2)
+  }
+  if (testit){
+    list(p_val = shapiro.test(resid(model))$p, 
+         decision = ifelse(test = shapiro.test(resid(model))$p < alpha, 
+                           yes = "Reject", no = "Fail to Reject"))
+  }
+}
+
+get_test_rmse = function(model, k) {
+  sqrt(mean((data_tst[, k] - predict(model, newdata = data_tst))^ 2))
+}
+
+get_perc_err = function(model, k) {
+  actual = data_tst[, k]
+  predicted = predict(model, newdata = data_tst)
+  100 * mean((abs(actual - predicted)) / actual)
+}
+```
