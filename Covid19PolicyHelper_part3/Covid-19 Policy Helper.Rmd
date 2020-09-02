@@ -132,7 +132,7 @@ StateOfInterest = c("Arizona", "California", "Minnesota", "New Mexico", "New Yor
 ### Demographic & Policy Data (County-Level)
 ```{r message=FALSE}
 library(readr)
-county_data_abridged = read_csv("county_data_abridged.csv")
+county_data_abridged = read_csv("../datasets/county_data_abridged.csv")
 ```
 
 ```{r}
