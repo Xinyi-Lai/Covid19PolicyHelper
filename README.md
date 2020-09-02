@@ -1,5 +1,6 @@
 # Covid19PolicyHelper
-[Link to submission](https://devpost.com/submit-to/10147-aws-data-exchange-challenge/start/submissions/172323-covid-19-policy-decision-helper/edit)
+[Link to submission](https://devpost.com/software/covid-19-policy-decision-helper)
+[Link to video](https://youtu.be/Ukk4G4EgeNs)
 
 ## What's your project called?
 Covid-19 Policy Decision Helper
